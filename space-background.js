@@ -123,54 +123,142 @@
     ctx.restore();
   }
 
-  function planetarySurvey(t) {
-    const small = mobileQuery.matches;
-    const x = w * (small ? 0.85 : 0.815);
-    const y = h * (small ? 0.20 : 0.29);
-    const r = Math.min(small ? 52 : 87, w * 0.085, h * 0.135);
-    const dx = reducedMotion ? 0 : Math.sin(t * 0.1) * 1.8;
+  // Textures are rendered on an intentionally low-resolution grid and upscaled
+  // with nearest-neighbour sampling: genuine pixel art, not a CSS filter.
+  const planetCache = new Map();
+  function pixelPlanetTexture(kind) {
+    if (planetCache.has(kind)) return planetCache.get(kind);
+    const n = kind === "main" ? 72 : 42;
+    const layer = document.createElement("canvas");
+    layer.width = layer.height = n;
+    const c = layer.getContext("2d");
+    const palette = kind === "main"
+      ? ["#101a3d","#243362","#3b5385","#6175b3","#819ac9","#c4cdf1"]
+      : kind === "ice"
+        ? ["#172e46","#215570","#367d99","#5db0c1","#9de0db","#d4fff0"]
+        : ["#2b214b","#493567","#765685","#a47d9f","#e1afaa","#ffdbc7"];
+    const rand = randomGenerator(kind === "main" ? 4132 : kind === "ice" ? 7478 : 3831);
+    for(let j=0;j<n;j++) for(let i=0;i<n;i++){
+      const a=(i+0.5-n/2)/(n/2-1),b=(j+0.5-n/2)/(n/2-1);
+      const dist=a*a+b*b;
+      if(dist>1)continue;
+      const light = -a*0.58-b*0.38 + 0.38;
+      const bands = Math.sin(j*0.48 + Math.sin(i*0.14)*2.2)*0.65;
+      const mottling = (rand()-0.5)*1.1;
+      const shade = Math.min(5,Math.max(0,Math.floor(2.1+light*2.4+bands+mottling)));
+      c.fillStyle=palette[shade];
+      c.fillRect(i,j,1,1);
+    }
+    planetCache.set(kind,layer);
+    return layer;
+  }
 
-    // Measured-looking orbit marks are decoration, not claimed scientific data.
+  function pixelOrbit(x,y,rx,ry,angle,color,step=0.023) {
     ctx.save();
-    ctx.translate(dx, 0);
-    ellipse(x, y, r * 2.5, r * 0.84, -0.38, "rgba(139,172,238,.23)");
-    ellipse(x, y, r * 2.9, r * 1.48, 0.36, "rgba(128,160,226,.13)", [3, 8]);
-    ellipse(x, y, r * 1.9, r * 1.80, -0.19, "rgba(166,178,243,.13)");
-
-    glow(x, y, r * 2.4, "rgba(85,100,191,.22)", "rgba(69,68,147,0)");
-    const planet = ctx.createRadialGradient(x - r * 0.38, y - r * 0.46, r * 0.06, x + r * 0.2, y + r * 0.1, r * 1.45);
-    planet.addColorStop(0, "#9fa7d5");
-    planet.addColorStop(0.45, "#545e9b");
-    planet.addColorStop(0.8, "#1d285b");
-    planet.addColorStop(1, "#080d25");
-    ctx.globalAlpha = small ? 0.45 : 0.81;
-    ctx.fillStyle = planet;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, TAU);
-    ctx.fill();
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, TAU);
-    ctx.clip();
-    ctx.strokeStyle = "rgba(213,220,255,.09)";
-    for (let i = -4; i <= 5; i++) {
-      ctx.lineWidth = i % 2 ? 3 : 8;
-      ctx.beginPath();
-      ctx.moveTo(x - r * 1.1, y + i * r * 0.22);
-      ctx.lineTo(x + r * 1.1, y + i * r * 0.22 - r * 0.5);
-      ctx.stroke();
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+    ctx.fillStyle=color;
+    for(let a=0;a<TAU;a+=step){
+      if(Math.floor(a/step)%5===0)continue;
+      const px=Math.cos(a)*rx,py=Math.sin(a)*ry;
+      ctx.fillRect(Math.round(px/3)*3,Math.round(py/3)*3,2,2);
     }
     ctx.restore();
-    ctx.globalAlpha = 1;
+  }
 
-    const p = t * 0.055 + 0.6;
-    const markerX = x + Math.cos(p) * r * 2.5;
-    const markerY = y + Math.sin(p) * r * 0.84;
-    ctx.fillStyle = "#b7d6ff";
-    ctx.beginPath();
-    ctx.arc(markerX, markerY, 2.2, 0, TAU);
-    ctx.fill();
+  function renderPlanet(kind,x,y,r,opacity=1) {
+    ctx.save();
+    ctx.globalAlpha=opacity;
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(pixelPlanetTexture(kind),Math.round(x-r),Math.round(y-r),r*2,r*2);
     ctx.restore();
+  }
+
+  function formulaAt(text,x,y,alpha) {
+    ctx.save();
+    ctx.font="11px 'DM Mono', monospace";
+    const pad=9,width=ctx.measureText(text).width + pad*2;
+    // Quiet HUD label, readable without competing with the main headline.
+    x=Math.max(8,Math.min(w-width-8,x-width/2));
+    y=Math.max(18,Math.min(h-15,y));
+    ctx.globalAlpha=alpha;
+    ctx.fillStyle="rgba(7,16,39,.79)";
+    ctx.fillRect(x,y-14,width,23);
+    ctx.strokeStyle="rgba(150,189,248,.4)";
+    ctx.strokeRect(x+.5,y-13.5,width-1,22);
+    ctx.fillStyle="#c7d9ff";
+    ctx.textBaseline="middle";
+    ctx.fillText(text,x+pad,y-2);
+    ctx.restore();
+  }
+
+  function orbitalPhysics(x,y,r,t) {
+    const mobile=mobileQuery.matches;
+    const entries=mobile
+      ? [{formula:"v = √(GM/r)",a:-0.35,rx:2.1,ry:1.44}]
+      : [
+          {formula:"F = Gm₁m₂ / r²",a:-1.75,rx:2.6,ry:1.75},
+          {formula:"v = √(GM/r)",a:0.13,rx:2.85,ry:1.42},
+          {formula:"T² = 4π²r³ / GM",a:1.85,rx:2.6,ry:1.62}
+        ];
+    for(let i=0;i<entries.length;i++){
+      const item=entries[i], angle=item.a + (reducedMotion?0:t*0.055)*(i%2===0?1:-1);
+      const fx=x+Math.cos(angle)*r*item.rx;
+      const fy=y+Math.sin(angle)*r*item.ry;
+      formulaAt(item.formula,fx,fy,mobile?.53:.76);
+    }
+    if(!mobile){
+      ctx.save();
+      ctx.fillStyle="rgba(156,192,247,.7)";
+      ctx.font="10px 'DM Mono', monospace";
+      ctx.fillText("ORBITAL MECHANICS  //  CONCEPTUAL",Math.min(w-260,Math.max(12,x-115)),Math.min(h-8,y+r*2.65));
+      ctx.restore();
+    }
+  }
+
+  function planetarySurvey(t) {
+    const mobile=mobileQuery.matches;
+    const x=w*(mobile?.79:.83), y=h*(mobile?.22:.30);
+    const r=Math.max(38,Math.min(mobile?64:110,w*(mobile?.125:.078),h*(mobile?.105:.145)));
+    const motion=reducedMotion?0:t;
+
+    glow(x,y,r*2.9,"rgba(83,99,210,.26)","rgba(48,46,129,0)");
+    pixelOrbit(x,y,r*2.6,r*1.30,-0.34,"rgba(138,176,246,.20)");
+    pixelOrbit(x,y,r*3.2,r*1.83,.38,"rgba(125,158,234,.12)",.032);
+    pixelOrbit(x,y,r*1.93,r*2.45,-.11,"rgba(165,178,235,.09)",.036);
+
+    // Pixelated orbital belt passes behind and in front of the planetary body.
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(-.34);
+    for(let a=0;a<Math.PI;a+=.023){
+      ctx.fillStyle="rgba(171,190,248,.48)";
+      ctx.fillRect(Math.round(Math.cos(a)*r*1.62/3)*3,Math.round(Math.sin(a)*r*.58/3)*3,3,3);
+    }
+    ctx.restore();
+    renderPlanet("main",x,y,r,mobile?.65:.96);
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(-.34);
+    for(let a=Math.PI;a<TAU;a+=.017){
+      ctx.fillStyle="rgba(202,207,255,.73)";
+      ctx.fillRect(Math.round(Math.cos(a)*r*1.62/3)*3,Math.round(Math.sin(a)*r*.58/3)*3,3,3);
+    }
+    ctx.restore();
+
+    const a=motion*.075+1.4;
+    const satelliteX=x+Math.cos(a)*r*2.6;
+    const satelliteY=y+Math.sin(a)*r*1.3;
+    renderPlanet("ice",satelliteX,satelliteY,Math.max(6,r*.105),.92);
+
+    if(!mobile){
+      const mx=w*.19,my=h*.72;
+      glow(mx,my,85,"rgba(52,153,171,.11)","rgba(17,60,93,0)");
+      renderPlanet("ice",mx,my,31,.72);
+      pixelOrbit(mx,my,65,25,.2,"rgba(134,212,234,.15)",.055);
+      renderPlanet("dust",w*.955,h*.86,43,.70);
+    }
+    orbitalPhysics(x,y,r,motion);
   }
 
   function spectralChart() {
@@ -221,51 +309,91 @@
     ctx.restore();
   }
 
+  function flame(x,y,px,width,height,t,alpha) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.globalAlpha=alpha;
+    const nozzle=-width/2, side=height*.17;
+    const cycle=reducedMotion?0:t;
+    // Flames share the ship coordinate system: exhaust remains attached
+    // when the ship turns, rather than sliding across the screen.
+    const color=["#fff7c0","#ffd47a","#ff8c63","#ac87ff","#6faaff"];
+    for(let engine=-1;engine<=1;engine+=2){
+      const cy=engine*side;
+      const length=px*(9+3*Math.sin(cycle*7+engine));
+      const g=ctx.createRadialGradient(nozzle-length*.40,cy,1,nozzle-length*.40,cy,length*.85);
+      g.addColorStop(0,"rgba(255,155,87,.3)");
+      g.addColorStop(1,"rgba(72,97,217,0)");
+      ctx.fillStyle=g;
+      ctx.fillRect(nozzle-length*1.4,cy-length*.9,length*1.7,length*1.8);
+      for(let j=0;j<13;j++){
+        const dist=j/12;
+        const cell=px*(dist<.5?1.0:.7);
+        const edge=1.7*(1-dist);
+        const bx=nozzle-px*(j+.8);
+        const wobble=Math.round(Math.sin(cycle*10+j*1.8+engine)*.85);
+        for(let k=-2;k<=2;k++){
+          if(Math.abs(k)>edge || (j>9 && Math.abs(k)>0))continue;
+          ctx.fillStyle=color[Math.min(4,Math.max(0,Math.floor(dist*4 + Math.abs(k)*.38)))];
+          ctx.globalAlpha=alpha*(1-dist*.68);
+          ctx.fillRect(Math.round(bx),Math.round(cy+(k+wobble)*px*.68),cell+1,cell+1);
+        }
+      }
+      for(let j=0;j<7;j++){
+        const dist=(j*.21+(cycle*.35)%1.6);
+        ctx.globalAlpha=alpha*.6*(1-j/8);
+        ctx.fillStyle=j%2?"#fdb679":"#a2b9ff";
+        ctx.fillRect(nozzle-px*(16+dist*7),cy+Math.sin(j*4.1+cycle*1.4)*px*3,px*.52,px*.52);
+      }
+    }
+    ctx.restore();
+  }
+
   function spacecraft(t) {
-    const small = mobileQuery.matches;
-    const base = small ? 1.65 : Math.min(3.15, Math.max(2.25, w / 560));
-    const drift = reducedMotion ? 0 : t;
-    const pX = w * (small ? 0.72 : 0.855) + Math.sin(drift * 0.12) * 12;
-    const pY = h * (small ? 0.69 : 0.62) - Math.cos(drift * 0.17) * 6;
-    const sX = w * (small ? 0.15 : 0.17) + Math.cos(drift * 0.09) * 8;
-    const sY = h * (small ? 0.82 : 0.79) + Math.sin(drift * 0.13) * 7;
+    const mobile=mobileQuery.matches;
+    const drift=reducedMotion?0:t;
+    const bigPx=mobile?3.15:Math.min(5.4,Math.max(4.0,w/370));
+    const littlePx=mobile?2.0:Math.min(4.0,Math.max(3.0,w/520));
+    const mainX=w*(mobile?.73:.82)+Math.sin(drift*.18)*13;
+    const mainY=h*(mobile?.70:.66)+Math.cos(drift*.20)*8;
+    const probeX=w*(mobile?.24:.15)+Math.cos(drift*.15)*12;
+    const probeY=h*(mobile?.88:.83)+Math.sin(drift*.19)*9;
 
     ctx.save();
-    ctx.strokeStyle = "rgba(129,167,246,.28)";
-    ctx.setLineDash([2, 8]);
-    ctx.lineWidth = 1;
+    ctx.strokeStyle="rgba(122,178,252,.21)";
+    ctx.lineWidth=1;
+    ctx.setLineDash([2,8]);
     ctx.beginPath();
-    ctx.moveTo(pX - 160, pY + 38);
-    ctx.quadraticCurveTo(pX - 70, pY - 52, pX - 14, pY + 10);
+    ctx.moveTo(mainX-220,mainY+65);
+    ctx.quadraticCurveTo(mainX-90,mainY-75,mainX-13,mainY+8);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(sX - 130, sY + 23);
-    ctx.quadraticCurveTo(sX - 40, sY - 35, sX - 8, sY + 8);
+    ctx.moveTo(probeX-130,probeY+38);
+    ctx.quadraticCurveTo(probeX-36,probeY-57,probeX+4,probeY+8);
     ctx.stroke();
-    ctx.setLineDash([]);
     ctx.restore();
 
-    // Thruster particles: intentionally subtle and slow (exploration, not combat).
-    for (let i = 0; i < 5; i++) {
-      const flicker = reducedMotion ? 0.4 : (1 + Math.sin(t * 3 - i * 0.85)) / 2;
-      ctx.globalAlpha = 0.18 + 0.25 * flicker;
-      ctx.fillStyle = "#91b8ff";
-      ctx.fillRect(pX - 47 * base / 2 - i * 12, pY + (i % 3 - 1) * 3, 3 + 2 * flicker, 1.5);
-      ctx.fillRect(sX - 37 * base / 2 - i * 8, sY + (i % 2) * 3, 2 + flicker, 1);
-    }
-    ctx.globalAlpha = 1;
-
-    pixelShip(explorer, pX, pY, base, -0.14, 0.94);
-    pixelShip(probe, sX, sY, base * 0.70, 0.21, 0.75);
-
-    if (!small) {
+    function oneShip(sprite,x,y,px,angle,alpha) {
       ctx.save();
-      ctx.font = "10px monospace";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "rgba(172,195,249,.72)";
-      ctx.fillText("EXPLORER-01  /  SIMULATED", pX - 48, pY + base * 7.5);
-      ctx.fillStyle = "rgba(154,178,226,.52)";
-      ctx.fillText("REMOTE PROBE  /  CONCEPT", sX - 30, sY + base * 6);
+      ctx.translate(x,y);
+      ctx.rotate(angle);
+      flame(0,0,px,sprite[0].length*px,sprite.length*px,drift,alpha);
+      ctx.restore();
+      pixelShip(sprite,x,y,px,angle,alpha);
+    }
+
+    oneShip(explorer,mainX,mainY,bigPx,-.10,mobile?.72:.93);
+    oneShip(probe,probeX,probeY,littlePx,.20,mobile?.57:.86);
+
+    // Tiny autonomous scout: an additional ship orbiting at a slower rate.
+    if(!mobile){
+      const sx=w*.71+Math.sin(drift*.10)*22,sy=h*.86+Math.cos(drift*.15)*13;
+      oneShip(probe,sx,sy,littlePx*.78,-.27,.63);
+      ctx.save();
+      ctx.fillStyle="rgba(175,199,251,.67)";
+      ctx.font="10px 'DM Mono', monospace";
+      ctx.fillText("EXPLORER-01 // ION THRUST",mainX-80,mainY+bigPx*8.8);
+      ctx.fillText("PROBE-02 // SCIENCE PAYLOAD",probeX-36,probeY+littlePx*8.3);
       ctx.restore();
     }
   }
