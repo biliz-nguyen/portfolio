@@ -10,7 +10,6 @@
   if (!header || !navigation) return;
 
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const links = Array.from(navigation.querySelectorAll("a[href]"));
   const active = navigation.querySelector('a[aria-current="page"]') ||
                  navigation.querySelector("a.active");
 
@@ -47,7 +46,7 @@
     r = Math.max(5, Math.min(cssRadius, headerHeight / 2 - 2, headerWidth / 2 - 2));
     perimeter = Math.max(1, 2 * (headerWidth - 2 * r) +
                          2 * (headerHeight - 2 * r) + Math.PI * 2 * r);
-    placeIndicator(navigation.querySelector("a.route-target") || active);
+    placeIndicator(active);
   }
 
   // Follow straight edges and four genuine circular corner arcs.
@@ -125,46 +124,19 @@
   else motion.addListener(syncMotion);
   document.addEventListener("visibilitychange", syncMotion);
 
-  // Keep links, browser history, downloads, external URLs and modifier-clicks normal.
-  let leaving = false;
-  document.addEventListener("click", event => {
-    if (event.defaultPrevented || event.button !== 0 ||
-        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
-        leaving) return;
-    const anchor = event.target.closest?.("a[href]");
-    if (!anchor || anchor.target && anchor.target !== "_self" ||
-        anchor.hasAttribute("download")) return;
-    const destination = new URL(anchor.href, window.location.href);
-    if (destination.origin !== location.origin || !/^https?:$/.test(destination.protocol))
-      return;
-    const changedDocument = destination.pathname !== location.pathname ||
-                            destination.search !== location.search;
-    // In-page anchors should scroll immediately rather than trigger a route effect.
-    if (!changedDocument || !(/\/$|\.html$/i.test(destination.pathname)))
-      return;
-    if (motion.matches) return;
-    event.preventDefault();
-    leaving = true;
-
-    const tab = links.find(a => {
-      const url = new URL(a.href, window.location.href);
-      return url.pathname === destination.pathname;
-    });
-    if (tab && !tab.classList.contains("nav-external")) {
-      tab.classList.add("route-target");
-      placeIndicator(tab);
-    }
-
-    document.body.classList.add("atlas-route-out");
-    // Navigation follows the visual exit; standard links remain a fallback.
-    window.setTimeout(() => window.location.assign(destination.href), 310);
+  // Let the browser navigate immediately. The CSS cross-document View
+  // Transitions API animates between pages in supported browsers.
+  // Avoid delaying clicks or blurring a huge scrolling page in JavaScript.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) measure();
   });
 
-  window.addEventListener("pagehide", () => cancelAnimationFrame(animationFrame));
+  window.addEventListener("pagehide", () => {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+  });
+
   window.addEventListener("pageshow", () => {
-    leaving = false;
-    document.body.classList.remove("atlas-route-out");
-    navigation.querySelectorAll(".route-target").forEach(el => el.classList.remove("route-target"));
     measure();
     syncMotion();
   });
