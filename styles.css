@@ -68,3 +68,8 @@ body.cosmic-site{background:#040713;isolation:isolate}
 .cosmic-site .hero>h1,.cosmic-site .hero>.lead{filter:drop-shadow(0 2px 15px rgba(0,0,0,.34))}
 @media(max-width:650px){#space-expedition{opacity:.64}.cosmic-site .field,.cosmic-site .note-card{background:rgba(7,14,33,.94)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Cosmic cowboy pixel emblem: transparent, crisp and responsive */
+.brand-logo{width:62px;height:62px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 0 10px rgba(247,180,60,.22))}
+.brand:hover .brand-logo{transform:translateY(-2px) rotate(-4deg)}
+@media(max-width:760px){.brand-logo{width:46px;height:46px}}
