@@ -88,11 +88,11 @@
   function atmosphere() {
     // Cool research-grade palette rather than arcade neon.
     glow(w * 0.80, h * 0.26, Math.min(w, h) * 0.68,
-      "rgba(71,76,158,.22)", "rgba(48,35,91,0)");
+      "rgba(59,68,126,.13)", "rgba(48,35,91,0)");
     glow(w * 0.18, h * 0.80, Math.min(w, h) * 0.59,
-      "rgba(28,102,152,.12)", "rgba(10,28,57,0)");
+      "rgba(21,80,127,.075)", "rgba(10,28,57,0)");
     glow(w * 0.58, h * 0.90, Math.min(w, h) * 0.58,
-      "rgba(91,46,125,.09)", "rgba(31,21,69,0)");
+      "rgba(71,42,108,.06)", "rgba(31,21,69,0)");
   }
 
   function starfield(t) {
