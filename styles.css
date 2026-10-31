@@ -73,3 +73,26 @@ body.cosmic-site{background:#040713;isolation:isolate}
 .brand-logo{width:62px;height:62px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 0 10px rgba(247,180,60,.22))}
 .brand:hover .brand-logo{transform:translateY(-2px) rotate(-4deg)}
 @media(max-width:760px){.brand-logo{width:46px;height:46px}}
+
+
+/* Minimal Research Atlas navigation and darker deep-space atmosphere */
+html,body.cosmic-site{background:#01030a}
+body.cosmic-site{--bg:#01030a;--surface:rgba(5,11,25,.89);--surface2:rgba(10,19,39,.94);--line:rgba(116,151,221,.16)}
+.cosmic-site .nav{position:sticky;top:12px;max-width:1400px;width:calc(100% - 36px);height:70px;margin:12px auto 0;padding:0 24px;border-radius:17px;background:linear-gradient(112deg,rgba(11,25,57,.96),rgba(4,10,26,.97) 50%,rgba(2,5,14,.98));box-shadow:0 10px 32px rgba(0,0,0,.34),inset 0 1px rgba(199,218,255,.07);border:1px solid rgba(115,154,238,.19);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.cosmic-site .nav .brand-logo{width:45px;height:45px}
+.cosmic-site .nav nav{gap:26px;align-items:center}
+.cosmic-site .nav nav a{font-size:12px;white-space:nowrap;color:#b9c5e3;transition:color .2s ease}
+.cosmic-site .nav nav a:hover,.cosmic-site .nav nav a.active{color:#f6f8ff}
+.cosmic-site .nav nav a.active{position:relative}
+.cosmic-site .nav nav a.active:after{content:"";position:absolute;bottom:-8px;left:0;right:0;height:2px;background:#98b6ff;border-radius:2px}
+.cosmic-site .nav nav .nav-external{color:#859ec8}
+#space-expedition{opacity:.73}
+.cosmic-site .field,.cosmic-site .note-card{background:rgba(5,12,28,.92)}
+.cosmic-site .page-header{padding-top:75px}
+.cosmic-site .compact-section{padding-top:34px}
+.cosmic-site .research-field{min-height:300px}
+.cosmic-site .research-method{margin:70px 0 90px;padding:36px;border:1px solid rgba(124,156,227,.19);background:linear-gradient(135deg,rgba(11,24,49,.85),rgba(3,8,22,.95));display:flex;justify-content:space-between;align-items:center;gap:28px;border-radius:15px}
+.cosmic-site .research-method h2{font-size:clamp(26px,3vw,38px);font-weight:500;letter-spacing:-.04em}
+.cosmic-site .research-method p{color:#aebdd8;line-height:1.7;max-width:690px}
+.cosmic-site .research-method .button{flex-shrink:0}
+@media(max-width:760px){.cosmic-site .nav{width:calc(100% - 24px);height:auto;min-height:76px;margin:12px auto 0;padding:12px 15px;border-radius:16px;gap:12px}.cosmic-site .nav .brand-logo{width:38px;height:38px}.cosmic-site .nav nav{gap:17px;flex-wrap:wrap}.cosmic-site .nav nav a{font-size:11px}.cosmic-site .research-method{display:block;padding:24px}.cosmic-site .research-method .button{margin-top:16px}#space-expedition{opacity:.56}}
