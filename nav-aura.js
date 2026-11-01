@@ -1,6 +1,6 @@
 /**
  * BILIZ / Aurora Flux Navigation
- * Soft, localized plasma ribbons along a curved navbar.
+ * Asymmetric photonic ribbons, optical interference and a moving energy comet.
  * Progressive enhancement; no change to page content or link behavior.
  */
 (() => {
@@ -86,51 +86,87 @@
     return {x:p.x+MARGIN+p.nx*wave,y:p.y+MARGIN+p.ny*wave};
   }
 
-  // Three energy ribbons live in localized arcs with dark gaps between them,
-  // avoiding a rigid or uniformly illuminated border.
-  function ribbons(time,boost) {
-    const groups=[
-      {start:.04,span:.24,alpha:.24,phase:.15},
-      {start:.39,span:.19,alpha:.15,phase:1.75},
-      {start:.74,span:.18,alpha:.20,phase:3.50}
-    ];
-    ctx.save();
-    ctx.lineCap="round";ctx.lineJoin="round";
-    for(let j=0;j<groups.length;j++) {
-      const g=groups[j];
-      const moving=(time*(j%2===0?.007:-.005))%1;
-      const begin=(g.start+moving)*perimeter;
-      const length=g.span*perimeter;
-      // Core and diffused halo share a sin/cos shape, not a static border.
-      for(let layer=0;layer<2;layer++){
+  // A luminous band with tapered opacity. The wavy motion is normal to the
+  // panel boundary; each strand has its own speed and phase (optical interference).
+  function drawRibbonSegment(config,time,boost) {
+    const {start,span,amp,alpha,phase,drift,coreWidth,haloWidth,haloBlur} = config;
+    const motion=(time*drift) % 1;
+    const begin=(start+motion)*perimeter;
+    const len=span*perimeter;
+    const steps=Math.max(32,Math.ceil(len/5));
+
+    // Broad diffused halo and narrow luminous filament.
+    // Each subsegment tapers toward its ends, leaving true dark gaps.
+    for(let layer=0;layer<2;layer++) {
+      ctx.save();
+      ctx.lineCap="round";
+      ctx.lineJoin="round";
+      ctx.lineWidth=layer===0?haloWidth+boost*1.8:coreWidth+boost*.55;
+      ctx.shadowBlur=layer===0?haloBlur+boost*8:7+boost*5;
+      ctx.shadowColor=layer===0?"rgba(73,139,255,.36)":"rgba(173,219,255,.28)";
+      let prev=wavePoint(begin,time,amp+(layer===0?.65:0)+boost*3.3,phase+(layer===0?.12:0));
+      for(let i=1;i<=steps;i++) {
+        const s=i/steps;
+        const p=wavePoint(begin+s*len,time,amp+(layer===0?.65:0)+boost*3.3,phase+(layer===0?.12:0));
+        // Gentle fade-in/out prevents visible hard line endings.
+        const envelope=Math.pow(Math.max(0,Math.sin(Math.PI*(s-.5/steps))),.72);
+        const opacity=(layer===0?alpha*.32:alpha) * envelope+
+          boost*(layer===0?.05:.12)*envelope;
+        ctx.strokeStyle=layer===0?
+          "rgba(75,146,255,"+opacity.toFixed(3)+")":
+          "rgba(203,231,255,"+opacity.toFixed(3)+")";
         ctx.beginPath();
-        const segments=Math.max(30,Math.round(length/5));
-        for(let i=0;i<=segments;i++) {
-          const d=begin+i/segments*length;
-          const p=wavePoint(d,time,(layer===0?3.1:4.3)+boost*3.6,g.phase);
-          if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
-        }
-        const opacity=(layer===0?.10:g.alpha)+boost*(layer===0?.08:.20);
-        ctx.strokeStyle=layer===0 ?
-          "rgba(76,139,246,"+opacity.toFixed(3)+")" :
-          "rgba(166,208,255,"+opacity.toFixed(3)+")";
-        ctx.lineWidth=layer===0?5.8+boost*2.3:1.05+boost*.6;
-        ctx.shadowBlur=layer===0?15:8;
-        ctx.shadowColor=layer===0?"rgba(80,146,255,.48)":"rgba(174,210,255,.32)";
+        ctx.moveTo(prev.x,prev.y);
+        ctx.lineTo(p.x,p.y);
         ctx.stroke();
+        prev=p;
       }
+      ctx.restore();
+    }
+  }
+
+  function ribbons(time,boost) {
+    ctx.save();
+    const bands=[
+      // Deliberately different lengths, luminosities, speeds and curvature.
+      {start:.015,span:.18,amp:4.8,alpha:.24,phase:.20,drift:.009,coreWidth:1.23,haloWidth:5.8,haloBlur:18},
+      {start:.11,span:.34,amp:2.9,alpha:.11,phase:1.85,drift:-.004,coreWidth:.90,haloWidth:4.1,haloBlur:13},
+      {start:.58,span:.16,amp:3.8,alpha:.16,phase:2.75,drift:.006,coreWidth:1.05,haloWidth:4.8,haloBlur:14},
+      {start:.77,span:.15,amp:5.6,alpha:.24,phase:4.10,drift:-.008,coreWidth:1.33,haloWidth:6.2,haloBlur:19}
+    ];
+    for(const band of bands)drawRibbonSegment(band,time,boost);
+
+    // Two faint interference lines do not follow a perfect parallel path.
+    // They are intentionally short so the panel never becomes a rigid frame.
+    ctx.lineCap="round";
+    for(let k=0;k<2;k++) {
+      const from=(k===0?.22:.64)*perimeter;
+      const span=(k===0?.12:.085)*perimeter;
+      ctx.beginPath();
+      for(let i=0;i<=30;i++) {
+        const s=i/30;
+        const d=from+span*s;
+        const p=wavePoint(d,time,1.6+boost*1.4,3.1+k);
+        const drift=Math.sin(time*1.2+i*.28+k)*2.1;
+        if(i===0)ctx.moveTo(p.x,p.y+drift);
+        else ctx.lineTo(p.x,p.y+drift);
+      }
+      ctx.strokeStyle="rgba(141,190,255,"+(.045+boost*.065).toFixed(3)+")";
+      ctx.lineWidth=.7;ctx.shadowBlur=5;
+      ctx.shadowColor="rgba(115,176,255,.16)";
+      ctx.stroke();
     }
     ctx.restore();
   }
 
   function energyStream(time,boost) {
-    const step=5.8+boost*2.7;
-    const length=24+Math.round(boost*12);
+    const step=5.2+boost*3.2;
+    const length=28+Math.round(boost*14);
     ctx.save();
     ctx.globalCompositeOperation="lighter";
     for(let i=length;i>=0;i--) {
       const strength=1-i/(length+1);
-      const p=wavePoint(position-i*step,time,4.2+boost*6.0,2.6);
+      const p=wavePoint(position-i*step,time,5.0+boost*7.4,2.6);
       const alpha=(.04+.48*strength*strength)*(1+boost*.38);
       const sz=.8+strength*(3.6+boost*1.4);
       ctx.fillStyle="rgba(137,188,255,"+Math.min(1,alpha).toFixed(3)+")";
@@ -140,7 +176,7 @@
         ctx.fillRect(p.x-.6,p.y-.6,1.2,1.2);
       }
     }
-    const p=wavePoint(position,time,4.2+boost*6.0,2.6);
+    const p=wavePoint(position,time,5.0+boost*7.4,2.6);
     const halo=20+boost*14;
     const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,halo);
     grad.addColorStop(0,"rgba(255,255,255,.99)");
@@ -150,6 +186,13 @@
     ctx.fillStyle=grad;
     ctx.fillRect(p.x-halo,p.y-halo,halo*2,halo*2);
     ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(p.x,p.y,2.8+boost*1.0,0,TAU);ctx.fill();
+    // Partial rings move out of phase, like an optical interference halo.
+    for(let q=0;q<2;q++) {
+      const ripple=8+q*7+Math.sin(time*2.2+q)*1.8;
+      ctx.strokeStyle="rgba(171,215,255,"+(.065-q*.021+boost*.04).toFixed(3)+")";
+      ctx.lineWidth=.9;
+      ctx.beginPath();ctx.arc(p.x,p.y,ripple,.1,Math.PI*1.55);ctx.stroke();
+    }
     ctx.restore();
   }
 

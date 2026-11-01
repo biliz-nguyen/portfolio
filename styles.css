@@ -475,3 +475,16 @@ body.cosmic-site .nav nav a.nav-github-icon:focus-visible {
   body.cosmic-site > header.nav{border-radius:18px!important}
   body.cosmic-site .nav nav a.nav-github-icon{width:30px;height:30px}
 }
+
+
+/* Asymmetric Photonic Aura V2: low-intensity optical waves, no hard outline. */
+body.cosmic-site .nav-aura-canvas {
+  opacity: .96;
+  mix-blend-mode: screen;
+}
+body.cosmic-site > header.nav::before {
+  background:linear-gradient(115deg,
+    rgba(95,138,225,.045),
+    rgba(22,36,68,.012) 42%,
+    rgba(10,17,36,0) 70%) !important;
+}
