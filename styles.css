@@ -194,3 +194,55 @@ body.cosmic-site>header.nav .nav-selection{display:none!important}
 .stardust-scanner{opacity:0!important}
 @media(max-width:760px){body.cosmic-site>header.nav{border-radius:18px!important}}
 @media(prefers-reduced-motion:reduce){.nav-molecule-canvas{display:none!important}}
+
+
+/* 2026-11-01 / SPACE_PLOT: full-pixel featured lab on Home.
+   Self-contained styles; existing header, cosmic canvas and research pages stay unchanged. */
+.page-home .pixel-lab{position:relative;z-index:2;margin:48px 0 0;padding:0 0 4px}
+.page-home .pixel-lab-window{position:relative;overflow:hidden;background:#060c1c;border:2px solid #415277;box-shadow:5px 5px 0 rgba(40,61,104,.45),inset 0 0 0 2px #101b32}
+.page-home .pixel-lab-window:before{content:"";pointer-events:none;position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(111,144,215,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(111,144,215,.035) 1px,transparent 1px);background-size:18px 18px}
+.page-home .pixel-lab-window>*{position:relative;z-index:1}
+.page-home .pixel-lab-topline,.page-home .pixel-lab-module-bar,.page-home .pixel-lab-foot,.page-home .pixel-lab-screen-head,.page-home .pixel-lab-screen-bottom{font-family:'DM Mono',monospace;letter-spacing:.075em}
+.page-home .pixel-lab-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;border-bottom:2px solid #29395a;color:#a9bce5;font-size:10px}
+.page-home .pixel-lab-path{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
+.page-home .pixel-lab-path>span{color:#ccd8ff;font-size:15px;line-height:1}
+.page-home .pixel-lab-status{display:flex;align-items:center;gap:9px;color:#9eb8ce;font-size:9px;white-space:nowrap}
+.page-home .pixel-lab-led{display:inline-block;width:7px;height:7px;background:#aadfc4;box-shadow:3px 3px 0 #406958}
+.page-home .pixel-lab-intro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;padding:26px 24px 28px;align-items:center}
+.page-home .pixel-lab-copy{min-width:0;padding:9px 8px 9px 6px}
+.page-home .pixel-lab-kicker{font:11px 'DM Mono',monospace;letter-spacing:.10em;color:#aebff8}
+.page-home .pixel-lab-copy h2{font-family:'Silkscreen','DM Mono',monospace;font-size:clamp(31px,4.9vw,61px);font-weight:700;line-height:1.12;letter-spacing:-.055em;margin:15px 0 12px;color:#f3f6ff;overflow-wrap:anywhere}
+.page-home .pixel-lab-copy h2 span{color:#aebfff}
+.page-home .pixel-lab-tagline{font-family:'Silkscreen','DM Mono',monospace;font-size:clamp(12px,1.45vw,16px);color:#d5dffc;line-height:1.65;margin:0 0 8px}
+.page-home .pixel-lab-description{font-size:14px;line-height:1.75;color:#acbad7;max-width:420px;margin:0}
+.page-home .pixel-lab-cta{display:inline-flex;align-items:center;gap:16px;margin-top:25px;padding:13px 16px;background:#c2d0ff;color:#0b142b;box-shadow:4px 4px 0 #576fa3;font:700 12px 'DM Mono',monospace;transition:transform .15s steps(2,end),box-shadow .15s steps(2,end),background .15s}
+.page-home .pixel-lab-cta:hover{color:#09112a;background:#e1e9ff;box-shadow:2px 2px 0 #576fa3;transform:translate(2px,2px)}
+.page-home .pixel-lab-cta:focus-visible,.page-home .pixel-lab-module:focus-visible{outline:2px solid #e3edff;outline-offset:3px}
+.page-home .pixel-lab-screen{min-width:0;border:2px solid #344566;background:radial-gradient(ellipse at 50% 55%,rgba(57,82,144,.25),transparent 70%),#081226;align-self:stretch;display:flex;flex-direction:column}
+.page-home .pixel-lab-screen-head,.page-home .pixel-lab-screen-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;color:#9bb0d7;font-size:9px}
+.page-home .pixel-lab-screen-head{border-bottom:2px solid #293959}
+.page-home .pixel-lab-screen-bottom{border-top:2px solid #293959;color:#8398c1}
+.page-home .pixel-lab-drone{width:100%;height:auto;max-height:242px;min-height:173px;flex:1;display:block;padding:8px 12px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(110,148,255,.18))}
+.page-home .pixel-lab-module-bar{display:flex;justify-content:space-between;align-items:center;background:#0c1529;color:#a7b9e4;font-size:10px;border-top:2px solid #354666;padding:12px 18px}
+.page-home .pixel-lab-modules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:#34435f;border-top:2px solid #34435f;border-bottom:2px solid #34435f}
+.page-home .pixel-lab-module{--module-accent:#b8c8ff;display:flex;flex-direction:column;align-items:flex-start;position:relative;isolation:isolate;min-width:0;min-height:201px;padding:18px 19px 17px;overflow:hidden;background:#0b1429;color:#f2f4ff;transition:background .16s steps(2,end)}
+.page-home .pixel-lab-module:before{content:"";position:absolute;inset:0 0 auto;width:100%;height:4px;background:var(--module-accent);transform:scaleX(0);transform-origin:left;transition:transform .2s steps(5,end)}
+.page-home .pixel-lab-module:after{content:"";position:absolute;right:0;bottom:0;width:38%;height:36%;background:linear-gradient(135deg,transparent,rgba(120,151,235,.06));pointer-events:none}
+.page-home .pixel-lab-module:hover{background:#15213d;color:#fff}
+.page-home .pixel-lab-module:hover:before,.page-home .pixel-lab-module:focus-visible:before{transform:scaleX(1)}
+.page-home .pixel-lab-hardware{--module-accent:#9bd8d7}
+.page-home .pixel-lab-flight{--module-accent:#b6c4ff}
+.page-home .pixel-lab-notes{--module-accent:#c9d4ff}
+.page-home .pixel-lab-module-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font:10px 'DM Mono',monospace;color:#9babcf;letter-spacing:.08em}
+.page-home .pixel-lab-module-meta>span{font-size:15px;color:var(--module-accent);transition:transform .16s steps(2,end)}
+.page-home .pixel-lab-module:hover .pixel-lab-module-meta>span{transform:translate(2px,-2px)}
+.page-home .pixel-lab-sprite{width:100px;height:69px;display:block;margin:9px 0 7px;image-rendering:pixelated;filter:drop-shadow(0 0 9px rgba(115,169,255,.10));transition:transform .2s steps(3,end),filter .2s}
+.page-home .pixel-lab-module:hover .pixel-lab-sprite{transform:translateY(-3px);filter:drop-shadow(0 0 10px rgba(155,191,255,.3))}
+.page-home .pixel-lab-module strong{font:700 clamp(12px,1.2vw,15px) 'Silkscreen','DM Mono',monospace;line-height:1.5;letter-spacing:.025em}
+.page-home .pixel-lab-module-description{font:12px/1.55 'DM Mono',monospace;color:#a5b5d0;margin-top:4px}
+.page-home .pixel-lab-module-more{margin-top:auto;padding-top:15px;font:10px 'DM Mono',monospace;color:var(--module-accent);letter-spacing:.04em}
+.page-home .pixel-lab-module-more>span{padding-left:4px}
+.page-home .pixel-lab-foot{display:flex;justify-content:space-between;gap:12px;padding:13px 18px;font-size:9px;color:#8399bc}
+@media(max-width:820px){.page-home .pixel-lab-intro{gap:14px;padding:22px 19px}.page-home .pixel-lab-copy h2{font-size:clamp(30px,5.4vw,47px)}.page-home .pixel-lab-module{padding:16px 12px;min-height:196px}.page-home .pixel-lab-module strong{font-size:12px}.page-home .pixel-lab-module-description{font-size:11px}}
+@media(max-width:630px){.page-home .pixel-lab{margin-top:36px}.page-home .pixel-lab-topline{padding:12px;font-size:9px}.page-home .pixel-lab-status{font-size:8px}.page-home .pixel-lab-intro{grid-template-columns:1fr;padding:19px 16px;gap:18px}.page-home .pixel-lab-copy{padding:4px 2px 0}.page-home .pixel-lab-copy h2{font-size:clamp(33px,9vw,49px)}.page-home .pixel-lab-description{font-size:13px}.page-home .pixel-lab-screen{max-width:100%}.page-home .pixel-lab-drone{min-height:140px;max-height:205px}.page-home .pixel-lab-modules{grid-template-columns:1fr}.page-home .pixel-lab-module{min-height:134px;padding:15px 17px 14px;display:grid;grid-template-columns:minmax(0,1fr) 96px;grid-template-rows:auto auto auto auto;column-gap:12px}.page-home .pixel-lab-module-meta{grid-column:1 / -1}.page-home .pixel-lab-sprite{grid-column:2;grid-row:2 / 5;margin:6px 0 0;width:96px;height:69px;align-self:center}.page-home .pixel-lab-module strong{grid-column:1;grid-row:2;align-self:end;margin-top:13px}.page-home .pixel-lab-module-description{grid-column:1;grid-row:3}.page-home .pixel-lab-module-more{grid-column:1;grid-row:4;padding-top:12px}.page-home .pixel-lab-foot{font-size:8px;padding:12px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.page-home .pixel-lab-cta,.page-home .pixel-lab-module,.page-home .pixel-lab-sprite,.page-home .pixel-lab-module:before,.page-home .pixel-lab-module-meta>span{transition:none!important}}
