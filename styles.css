@@ -329,3 +329,47 @@ body.cosmic-site>footer.scroll-dissolving{
 @media (prefers-reduced-motion: reduce) {
   .nav-comet-head { box-shadow: 0 0 5px 1px #fff, 0 0 13px 4px rgba(127,184,255,.5); }
 }
+
+
+/* PIXEL METEOR SHARDS: NO CONTINUOUS BORDER OR OLD COMET LAYERS. */
+body.cosmic-site > header.nav,
+body.cosmic-site > header.nav.molecule-reacting,
+body.cosmic-site > header.nav.stardust-contact,
+body.cosmic-site > header.nav.stardust-contact.molecule-reacting {
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 20px !important;
+  background: linear-gradient(112deg, #0b1733, #060c20 52%, #030713) !important;
+  box-shadow: 0 12px 26px rgba(0,0,0,.28), inset 0 0 19px rgba(91,131,224,.04) !important;
+  overflow: visible !important;
+}
+body.cosmic-site > header.nav::before {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: linear-gradient(110deg,rgba(19,35,72,.19),rgba(4,10,23,.04)) !important;
+  border-radius: inherit;
+}
+.nav-comet-layer, .nav-comet-head, .nav-comet-trail,
+.nav-molecule-canvas, .nav-orbit-light, .nav-selection {
+  display: none !important;
+}
+.nav-shard-canvas {
+  position: fixed;
+  pointer-events: none;
+  display: block;
+  z-index: 1008;
+  background: transparent;
+  image-rendering: auto;
+  mix-blend-mode: screen;
+}
+body.cosmic-site > header.nav .brand,
+body.cosmic-site > header.nav nav { position: relative; z-index: 3; }
+body.cosmic-site > header.nav nav a.active:after {
+  display: block !important;
+  background: linear-gradient(90deg,transparent,rgba(167,204,255,.84),transparent);
+  box-shadow: 0 0 8px rgba(112,156,230,.3);
+}
+@media (max-width: 760px){
+  body.cosmic-site > header.nav {border-radius: 18px !important;}
+}
