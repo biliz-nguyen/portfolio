@@ -21,7 +21,7 @@
 
   const TAU = Math.PI * 2;
   const MARGIN = 48;
-  const VERSION = 3;
+  const VERSION = 5;
   let width = 0, height = 0, radius = 20, perimeter = 1, scale = 1;
   let rect = null, shards = [], sparks = [], frame = 0;
   let lastTime = performance.now(), lastScroll = window.scrollY;
@@ -66,20 +66,26 @@
 
   function generateShards() {
     const random = seededRandom(20261101 + VERSION);
-    const count = Math.max(54, Math.min(130, Math.floor(perimeter/22)));
+    // Sparse meteor groups with deliberate gaps, not a segmented border.
+    const groups = Math.max(23, Math.min(43, Math.floor(perimeter / 80)));
     shards = [];
-    for(let i=0;i<count;i++) {
-      const stagger = (random()-.5)*perimeter/count*.8;
-      shards.push({
-        distance:(i+.15)/count*perimeter+stagger,
-        size:4+random()*4.4,
-        length:6+random()*8.5,
-        phase:random()*TAU,
-        rotation:(random()-.5)*.45,
-        scatter:.6+random()*1.3,
-        shade:random(),
-        glint:random()>.87
-      });
+    for (let i=0; i<groups; i++) {
+      if(random()<.17) continue;
+      const pieces = random()<.32 ? 2 : 1;
+      const center = ((i+(random()-.5)*.73)/groups)*perimeter;
+      for(let j=0;j<pieces;j++){
+        shards.push({
+          distance:center+(random()-.5)*(pieces===2?19:9),
+          outward:random()<.25 ? -(2+random()*5) : 4+random()*13,
+          size:2.6+random()*3.4,
+          length:3.8+random()*5.6,
+          phase:random()*TAU,
+          rotation:(random()-.5)*.8,
+          scatter:.6+random()*1.4,
+          shade:random(),
+          glint:random()>.90
+        });
+      }
     }
   }
 
@@ -119,11 +125,11 @@
 
   // Each rock is an irregular polygon made of sharply stepped pixel-like facets.
   function drawRock(shard,p,time,reaction) {
-    const float = Math.sin(time*.65+shard.phase)*.7;
-    const pop = reaction*(6+shard.scatter*10);
-    const tangent = Math.cos(time*.8+shard.phase)*.55 + reaction*shard.scatter*4;
-    const x = Math.round(p.x+p.nx*(2.5+float+pop)+p.tx*tangent+MARGIN);
-    const y = Math.round(p.y+p.ny*(2.5+float+pop)+p.ty*tangent+MARGIN);
+    const float = Math.sin(time*.53+shard.phase)*.9;
+    const pop = reaction*(7+shard.scatter*11);
+    const tangent = Math.cos(time*.67+shard.phase)*.8 + reaction*(shard.scatter-.75)*7;
+    const x = Math.round(p.x+p.nx*(shard.outward+float+pop)+p.tx*tangent+MARGIN);
+    const y = Math.round(p.y+p.ny*(shard.outward+float+pop)+p.ty*tangent+MARGIN);
     const angle = Math.atan2(p.ty,p.tx)+shard.rotation+
       Math.sin(time*.6+shard.phase)*.065+reaction*(shard.scatter-.4)*.25;
     const len = shard.length, thick = shard.size;
@@ -138,8 +144,8 @@
     ctx.lineTo(Math.round(len*.17),Math.round(thick*.54));
     ctx.lineTo(Math.round(-len*.48),Math.round(thick*.46));
     ctx.closePath();
-    const a = .27+shard.shade*.20+reaction*.18;
-    ctx.fillStyle="rgba(108,138,191,"+a.toFixed(3)+")";
+    const a = .15+shard.shade*.17+reaction*.17;
+    ctx.fillStyle="rgba(115,149,203,"+a.toFixed(3)+")";
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(Math.round(-len*.34),Math.round(-thick*.62));
@@ -147,7 +153,7 @@
     ctx.lineTo(Math.round(len*.17),Math.round(-thick*.12));
     ctx.lineTo(Math.round(-len*.42),Math.round(-thick*.08));
     ctx.closePath();
-    ctx.fillStyle="rgba(183,213,255,"+(.17+reaction*.20).toFixed(3)+")";
+    ctx.fillStyle="rgba(172,207,248,"+(.10+reaction*.18).toFixed(3)+")";
     ctx.fill();
     if(shard.glint) {
       ctx.fillStyle="rgba(215,236,255,"+(.32+reaction*.25).toFixed(3)+")";
@@ -160,14 +166,14 @@
     streamDistance=(streamDistance+(104+reaction*135)*dt)%perimeter;
     const strength = .78+reaction*.22;
     // Dotted tail flows through the cracks; one bright comet-like head.
-    for(let i=28;i>=0;i--) {
-      const fade=1-i/29;
+    for(let i=23;i>=0;i--) {
+      const fade=1-i/24;
       const p=borderPoint(streamDistance-i*(6.5+reaction*3.4));
       const wave=Math.sin(time*4.1+i*.47)* (2.3+reaction*5);
       const x=p.x+p.nx*wave+MARGIN;
       const y=p.y+p.ny*wave+MARGIN;
-      const alpha=(.055+fade*fade*.66)*strength;
-      const size=i===0?6.3:1.2+fade*3.3;
+      const alpha=(.035+fade*fade*.56)*strength;
+      const size=i===0?5.5:1+fade*2.9;
       ctx.fillStyle="rgba(128,190,255,"+alpha.toFixed(3)+")";
       ctx.fillRect(Math.round(x-size/2),Math.round(y-size/2),size,size);
     }

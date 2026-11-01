@@ -386,3 +386,33 @@ body.cosmic-site .nav-shard-canvas {
   pointer-events: none !important;
   mix-blend-mode: screen;
 }
+
+/* V5: Floating pixel meteor clusters and a soft atmospheric panel. */
+body.cosmic-site > header.nav,
+body.cosmic-site > header.nav.molecule-reacting,
+body.cosmic-site > header.nav.stardust-contact,
+body.cosmic-site > header.nav.stardust-contact.molecule-reacting {
+  border: 0 !important;
+  outline: 0 !important;
+  background: linear-gradient(108deg, rgba(9,17,36,.89) 0%,
+    rgba(6,11,27,.84) 50%, rgba(4,8,20,.88) 100%) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.16),
+    inset 0 0 20px rgba(110,152,221,.018) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(.9) !important;
+  backdrop-filter: blur(15px) saturate(.9) !important;
+}
+body.cosmic-site > header.nav::before {
+  background: linear-gradient(110deg, rgba(69,104,172,.045),
+    rgba(16,29,56,.008) 58%, transparent) !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+body.cosmic-site .nav-shard-canvas { opacity: .85; mix-blend-mode: normal; }
+@media(max-width:760px){
+  body.cosmic-site > header.nav,
+  body.cosmic-site > header.nav.stardust-contact{
+    background:linear-gradient(110deg,rgba(8,16,34,.92),rgba(4,9,23,.90)) !important;
+    -webkit-backdrop-filter:blur(12px) !important;
+    backdrop-filter:blur(12px) !important;
+  }
+}
