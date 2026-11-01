@@ -72,8 +72,8 @@
       const stagger = (random()-.5)*perimeter/count*.8;
       shards.push({
         distance:(i+.15)/count*perimeter+stagger,
-        size:3+random()*4.2,
-        length:4+random()*8,
+        size:4+random()*4.4,
+        length:6+random()*8.5,
         phase:random()*TAU,
         rotation:(random()-.5)*.45,
         scatter:.6+random()*1.3,
@@ -86,7 +86,10 @@
   function placeCanvas() {
     const b = nav.getBoundingClientRect();
     rect = b;
-    if(Math.abs(lastRectX-b.left)>.2 || Math.abs(lastRectY-b.top)>.2) {
+    // NaN comparisons are always false. Explicit initialization is essential:
+    // otherwise a fixed Canvas appended at the bottom of <body> renders offscreen.
+    if(!Number.isFinite(lastRectX) || !Number.isFinite(lastRectY) ||
+       Math.abs(lastRectX-b.left)>.2 || Math.abs(lastRectY-b.top)>.2) {
       canvas.style.left = (b.left-MARGIN)+"px";
       canvas.style.top = (b.top-MARGIN)+"px";
       lastRectX=b.left;
@@ -135,7 +138,7 @@
     ctx.lineTo(Math.round(len*.17),Math.round(thick*.54));
     ctx.lineTo(Math.round(-len*.48),Math.round(thick*.46));
     ctx.closePath();
-    const a = .19+shard.shade*.16+reaction*.19;
+    const a = .27+shard.shade*.20+reaction*.18;
     ctx.fillStyle="rgba(108,138,191,"+a.toFixed(3)+")";
     ctx.fill();
     ctx.beginPath();
@@ -144,7 +147,7 @@
     ctx.lineTo(Math.round(len*.17),Math.round(-thick*.12));
     ctx.lineTo(Math.round(-len*.42),Math.round(-thick*.08));
     ctx.closePath();
-    ctx.fillStyle="rgba(165,195,243,"+(.09+reaction*.17).toFixed(3)+")";
+    ctx.fillStyle="rgba(183,213,255,"+(.17+reaction*.20).toFixed(3)+")";
     ctx.fill();
     if(shard.glint) {
       ctx.fillStyle="rgba(215,236,255,"+(.32+reaction*.25).toFixed(3)+")";
@@ -163,8 +166,8 @@
       const wave=Math.sin(time*4.1+i*.47)* (2.3+reaction*5);
       const x=p.x+p.nx*wave+MARGIN;
       const y=p.y+p.ny*wave+MARGIN;
-      const alpha=(.025+fade*fade*.52)*strength;
-      const size=i===0?5.4:1+fade*3.1;
+      const alpha=(.055+fade*fade*.66)*strength;
+      const size=i===0?6.3:1.2+fade*3.3;
       ctx.fillStyle="rgba(128,190,255,"+alpha.toFixed(3)+")";
       ctx.fillRect(Math.round(x-size/2),Math.round(y-size/2),size,size);
     }

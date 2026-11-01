@@ -373,3 +373,16 @@ body.cosmic-site > header.nav nav a.active:after {
 @media (max-width: 760px){
   body.cosmic-site > header.nav {border-radius: 18px !important;}
 }
+
+
+/* Pixel shards V4 — first-paint positioning fix and clearly visible fragments */
+body.cosmic-site .nav-shard-canvas {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  z-index: 1008 !important;
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  mix-blend-mode: screen;
+}
