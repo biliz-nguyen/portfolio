@@ -113,19 +113,19 @@
   // as scroll boosts change: distance is integrated using delta time.
   function drawComet(time, dt) {
     const energy = Math.max(boost, hover ? 0.17 : 0);
-    const speed = 151 + energy * 178;
+    const speed = 128 + energy * 155;
     cometDistance = (cometDistance + speed * dt) % perimeter;
     const p = borderPoint(cometDistance);
 
-    const amplitude = 3.6 + energy * 7.2;
-    const normalWave = (Math.sin(time * 5.1) * .72 +
-                        Math.cos(time * 2.35) * .37) * amplitude;
-    const tangentWave = Math.sin(time * 3.1) * (1.1 + energy * 2.0);
+    const amplitude = 5.4 + energy * 7.8;
+    const normalWave = (Math.sin(time * 4.0) * .72 +
+                        Math.cos(time * 2.05) * .37) * amplitude;
+    const tangentWave = Math.sin(time * 2.7) * (1.8 + energy * 2.6);
 
     const x = p.x + margin + p.nx * normalWave + p.tx * tangentWave;
     const y = p.y + margin + p.ny * normalWave + p.ty * tangentWave;
     cometTrail.unshift({x, y});
-    const trailLimit = Math.round(28 + energy * 22);
+    const trailLimit = Math.round(37 + energy * 24);
     if (cometTrail.length > trailLimit) cometTrail.length = trailLimit;
 
     ctx.save();
@@ -136,7 +136,7 @@
     for (let i = cometTrail.length - 1; i >= 0; i--) {
       const tail = cometTrail[i];
       const strength = 1 - i / (cometTrail.length + 1);
-      const alpha = (.07 + energy * .16) * strength * strength;
+      const alpha = (.105 + energy * .16) * strength * strength;
       const size = .9 + strength * (3.4 + energy * 1.9);
       ctx.fillStyle = "rgba(109,166,255," + alpha.toFixed(3) + ")";
       ctx.beginPath();
@@ -147,7 +147,7 @@
     }
 
     // Tight luminous halo keeps the dot legible without creating a hard border.
-    const halo = 15 + energy * 12;
+    const halo = 18 + energy * 13;
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, halo);
     gradient.addColorStop(0, "rgba(246,250,255,.87)");
     gradient.addColorStop(.12, "rgba(207,233,255,.69)");
