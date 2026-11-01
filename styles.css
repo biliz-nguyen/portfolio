@@ -135,3 +135,16 @@ body.cosmic-site #space-expedition{z-index:0!important}
 @media(prefers-reduced-motion:reduce){
   ::view-transition-old(root),::view-transition-new(root){animation:none!important}
 }
+
+
+/* Stardust Dissolve: fade the physical content near the bottom of sticky nav. */
+body.cosmic-site > main.scroll-dissolving,
+body.cosmic-site > footer.scroll-dissolving{
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent max(0px,var(--dissolve-cut,0px)),rgba(0,0,0,.22) calc(max(0px,var(--dissolve-cut,0px)) + 22px),#000 calc(max(0px,var(--dissolve-cut,0px)) + 68px));
+  mask-image:linear-gradient(to bottom,transparent 0,transparent max(0px,var(--dissolve-cut,0px)),rgba(0,0,0,.22) calc(max(0px,var(--dissolve-cut,0px)) + 22px),#000 calc(max(0px,var(--dissolve-cut,0px)) + 68px));
+}
+body.cosmic-site > header.nav.stardust-contact{border-color:rgba(135,184,255,.38)!important;box-shadow:0 10px 32px rgba(0,0,0,.34),0 0 24px rgba(71,121,221,.11),inset 0 1px rgba(213,230,255,.10)}
+.stardust-layer{position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden}
+.stardust-pixel{position:absolute;background:var(--dust-color,#b9ceff);box-shadow:0 0 8px rgba(148,190,255,.6);will-change:transform,opacity;animation:stardust-evaporate var(--dust-duration,650ms) ease-out forwards}
+@keyframes stardust-evaporate{0%{transform:translate3d(0,0,0) scale(1);opacity:.85}70%{opacity:.53}100%{transform:translate3d(var(--drift-x,12px),var(--drift-y,-40px),0) scale(.25);opacity:0}}
+@media(prefers-reduced-motion:reduce){.stardust-layer{display:none!important}.stardust-pixel{animation:none!important}}
