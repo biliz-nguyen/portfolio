@@ -416,3 +416,62 @@ body.cosmic-site .nav-shard-canvas { opacity: .85; mix-blend-mode: normal; }
     backdrop-filter:blur(12px) !important;
   }
 }
+
+
+/* 2026-11-01 — Aurora Flux Navbar: no shards or rigid border */
+body.cosmic-site > header.nav,
+body.cosmic-site > header.nav.molecule-reacting,
+body.cosmic-site > header.nav.stardust-contact,
+body.cosmic-site > header.nav.stardust-contact.molecule-reacting {
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 20px !important;
+  overflow: visible !important;
+  background: linear-gradient(109deg,rgba(9,17,36,.87),rgba(5,11,26,.81) 54%,rgba(3,8,19,.85)) !important;
+  box-shadow: 0 11px 30px rgba(0,0,0,.17),inset 0 0 16px rgba(95,143,231,.018) !important;
+  backdrop-filter: blur(14px) saturate(.96) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(.96) !important;
+}
+body.cosmic-site > header.nav::before {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: linear-gradient(112deg,rgba(91,128,211,.035),transparent 65%) !important;
+}
+body.cosmic-site .nav-aura-canvas {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  z-index: 1008 !important;
+  display: block !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  mix-blend-mode: screen;
+}
+body.cosmic-site .nav-shard-canvas,
+body.cosmic-site .nav-comet-layer,
+body.cosmic-site .nav-molecule-canvas,
+body.cosmic-site .nav-orbit-light,
+body.cosmic-site .nav-selection { display:none!important; }
+body.cosmic-site .nav nav a.nav-github-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #c5d5f5;
+  transition: color .2s ease, transform .2s ease, background .2s ease;
+}
+body.cosmic-site .nav nav a.nav-github-icon svg {display:block;width:19px;height:19px}
+body.cosmic-site .nav nav a.nav-github-icon:hover,
+body.cosmic-site .nav nav a.nav-github-icon:focus-visible {
+  color:#fff;
+  background:rgba(110,160,250,.10);
+  transform: translateY(-1px);
+}
+@media(max-width:760px){
+  body.cosmic-site > header.nav{border-radius:18px!important}
+  body.cosmic-site .nav nav a.nav-github-icon{width:30px;height:30px}
+}
