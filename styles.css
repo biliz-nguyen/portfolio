@@ -161,3 +161,36 @@ body.cosmic-site > footer.scroll-dissolving{
 body.cosmic-site > header.nav.stardust-contact{border-color:rgba(141,192,255,.51)!important;box-shadow:0 10px 32px rgba(0,0,0,.34),0 0 28px rgba(85,142,246,.17),inset 0 1px rgba(221,237,255,.13)}
 .stardust-pixel{filter:none;box-shadow:0 0 8px 2px rgba(129,183,255,.46)}
 @media(prefers-reduced-motion:reduce){.stardust-scanner{display:none!important}}
+
+
+/* B / Molecular border experiment: the particles ARE the outline. */
+body.cosmic-site>header.nav{
+  border:1px solid transparent!important;
+  border-radius:20px!important;
+  background:linear-gradient(110deg,rgba(11,23,51,.95),rgba(5,10,26,.97) 54%,rgba(2,5,15,.96))!important;
+  box-shadow:0 8px 25px rgba(0,0,0,.32),inset 0 0 16px rgba(94,138,223,.035)!important;
+  overflow:visible!important;
+  isolation:isolate;
+  transition:box-shadow .32s ease,background .32s ease;
+}
+body.cosmic-site>header.nav.molecule-reacting,
+body.cosmic-site>header.nav.stardust-contact.molecule-reacting{
+  border-color:transparent!important;
+  box-shadow:0 10px 32px rgba(0,0,0,.34),0 0 24px rgba(87,144,242,.075),inset 0 0 23px rgba(116,166,251,.08)!important;
+}
+body.cosmic-site>header.nav .nav-orbit-light{display:none!important}
+body.cosmic-site>header.nav .brand,body.cosmic-site>header.nav nav{position:relative;z-index:3}
+.nav-molecule-canvas{position:fixed;z-index:1001;pointer-events:none;display:block;image-rendering:auto}
+body.cosmic-site>header.nav nav a.active:after{
+  display:block!important;
+  background:linear-gradient(90deg,rgba(114,158,255,.12),#a6c8ff,rgba(114,158,255,.12));
+  box-shadow:0 0 9px rgba(138,182,255,.26);
+  transition:box-shadow .28s ease,opacity .28s ease;
+}
+body.cosmic-site>header.nav.molecule-reacting nav a.active:after{
+  box-shadow:0 0 13px rgba(143,204,255,.63);
+}
+body.cosmic-site>header.nav .nav-selection{display:none!important}
+.stardust-scanner{opacity:0!important}
+@media(max-width:760px){body.cosmic-site>header.nav{border-radius:18px!important}}
+@media(prefers-reduced-motion:reduce){.nav-molecule-canvas{display:none!important}}
