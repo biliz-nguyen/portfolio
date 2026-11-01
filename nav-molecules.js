@@ -23,6 +23,7 @@
   let deviceScale = 1, frame = 0, lastTime = 0, lastPaint = 0, lastScrollY = scrollY;
   let boost = 0, hover = false, particles = [], emissionDebt = 0, reacting = false;
   let oldLeft = NaN, oldTop = NaN, oldWidth = 0, oldHeight = 0;
+  let cometDistance = 0, cometTrail = [];
 
   function fit() {
     const b = nav.getBoundingClientRect();
@@ -42,6 +43,8 @@
       canvas.style.height = (height + margin * 2) + "px";
       ctx.setTransform(px, 0, 0, px, 0, 0);
       particles = [];
+      cometTrail = [];
+      cometDistance = (cometDistance % perimeter + perimeter) % perimeter;
       emissionDebt = 0;
       oldWidth = width;
       oldHeight = height;
@@ -104,6 +107,61 @@
     });
   }
 
+
+  // One orbiting comet follows the rounded panel but wobbles along the
+  // outward normal using both sine and cosine. Motion stays continuous
+  // as scroll boosts change: distance is integrated using delta time.
+  function drawComet(time, dt) {
+    const energy = Math.max(boost, hover ? 0.17 : 0);
+    const speed = 151 + energy * 178;
+    cometDistance = (cometDistance + speed * dt) % perimeter;
+    const p = borderPoint(cometDistance);
+
+    const amplitude = 3.6 + energy * 7.2;
+    const normalWave = (Math.sin(time * 5.1) * .72 +
+                        Math.cos(time * 2.35) * .37) * amplitude;
+    const tangentWave = Math.sin(time * 3.1) * (1.1 + energy * 2.0);
+
+    const x = p.x + margin + p.nx * normalWave + p.tx * tangentWave;
+    const y = p.y + margin + p.ny * normalWave + p.ty * tangentWave;
+    cometTrail.unshift({x, y});
+    const trailLimit = Math.round(28 + energy * 22);
+    if (cometTrail.length > trailLimit) cometTrail.length = trailLimit;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+
+    // Graduated blue/ice-white pixels make a cinematic meteor tail.
+    // Older positions fade out; scroll lengthens and brightens the tail.
+    for (let i = cometTrail.length - 1; i >= 0; i--) {
+      const tail = cometTrail[i];
+      const strength = 1 - i / (cometTrail.length + 1);
+      const alpha = (.07 + energy * .16) * strength * strength;
+      const size = .9 + strength * (3.4 + energy * 1.9);
+      ctx.fillStyle = "rgba(109,166,255," + alpha.toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(tail.x, tail.y, size * 1.7, 0, PI2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(195,228,255," + Math.min(.85, alpha * 2.2).toFixed(3) + ")";
+      ctx.fillRect(tail.x - size * .32, tail.y - size * .32, size * .65, size * .65);
+    }
+
+    // Tight luminous halo keeps the dot legible without creating a hard border.
+    const halo = 15 + energy * 12;
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, halo);
+    gradient.addColorStop(0, "rgba(246,250,255,.87)");
+    gradient.addColorStop(.12, "rgba(207,233,255,.69)");
+    gradient.addColorStop(.38, "rgba(118,178,255," + (.22 + energy * .19).toFixed(3) + ")");
+    gradient.addColorStop(1, "rgba(118,178,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x - halo, y - halo, halo * 2, halo * 2);
+    ctx.fillStyle = "#f9fcff";
+    ctx.beginPath();
+    ctx.arc(x, y, 2.25 + energy * 1.3, 0, PI2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function draw(time,dt) {
     ctx.clearRect(0,0,width + margin * 2,height + margin * 2);
     if (reduce.matches) return;
@@ -140,16 +198,7 @@
         ctx.fillRect(px,py-2,.5,4.5);
       }
     }
-    // One understated moving energy cluster during stronger reactions.
-    if(boost>.13) {
-      const p=borderPoint(((time*56)%perimeter));
-      const intensity = Math.min(.45,boost*.35);
-      const g=ctx.createRadialGradient(p.x+margin,p.y+margin,0,p.x+margin,p.y+margin,16);
-      g.addColorStop(0,"rgba(144,199,255,"+intensity.toFixed(3)+")");
-      g.addColorStop(1,"rgba(144,199,255,0)");
-      ctx.fillStyle=g;
-      ctx.fillRect(p.x+margin-16,p.y+margin-16,32,32);
-    }
+    drawComet(time, dt);
   }
 
   function tick(now) {
