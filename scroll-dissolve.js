@@ -1,133 +1,153 @@
 /**
- * Stardust Dissolve — scroll-aware content transition into the orbiting navbar.
- * Decorative only: the document structure and ordinary links stay untouched.
+ * Stardust Dissolve v2 — scroll content evaporates before reaching the navbar.
+ * Lightweight, decorative, and independent of portfolio article content.
  */
 (() => {
   "use strict";
+
   const header = document.querySelector("body.cosmic-site > header.nav");
   const main = document.querySelector("body.cosmic-site > main");
   if (!header || !main) return;
 
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
-  const regions = [main, document.querySelector("body.cosmic-site > footer")].filter(Boolean);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const dustLayer = document.createElement("div");
   dustLayer.className = "stardust-layer";
   dustLayer.setAttribute("aria-hidden", "true");
+
+  const scanner = document.createElement("div");
+  scanner.className = "stardust-scanner";
+  dustLayer.appendChild(scanner);
   document.body.appendChild(dustLayer);
 
-  let frameId = 0;
-  let lastScrollY = window.scrollY;
-  let lastBurstAt = 0;
-  let screenReaderMotion = reduceMotion.matches;
-  let dustCount = 0;
+  const targets = [main, document.querySelector("body.cosmic-site > footer")].filter(Boolean);
+  let scrollFrame = 0;
+  let oldY = window.scrollY;
+  let lastEmission = 0;
+  let activeDust = 0;
+  let isReduced = reduced.matches;
 
-  const rand = (min, max) => min + Math.random() * (max - min);
+  function random(min, max) {
+    return min + Math.random() * (max - min);
+  }
 
-  function findContact(edge) {
-    // Only create particles when an actual content element is near the panel.
-    const selectors = "h1,h2,h3,p,.field,.note-card,.telemetry,.hero-figure,.research-method,.search-bar,.prose pre,.prose blockquote";
+  function selectContact(edge) {
+    // A larger sampling zone makes the effect visible during normal scrolling.
+    const selectors = "h1,h2,h3,p,.lead,.field,.note-card,.telemetry,.hero-figure,.research-method,.search-bar,.prose,.manifesto";
     const hits = [];
-    const bounds = header.getBoundingClientRect();
-    main.querySelectorAll(selectors).forEach(node => {
+    const headerRect = header.getBoundingClientRect();
+    const elements = main.querySelectorAll(selectors);
+    for (const node of elements) {
       const box = node.getBoundingClientRect();
-      if (box.bottom < edge - 8 || box.top > edge + 57 ||
-          box.right < bounds.left || box.left > bounds.right ||
-          box.width < 30 || box.height < 9) return;
+      if (box.bottom < edge - 80 || box.top > edge + 115 ||
+          box.right < headerRect.left + 10 ||
+          box.left > headerRect.right - 10 ||
+          box.height < 12) continue;
       hits.push(box);
-    });
+      if (hits.length >= 18) break;
+    }
     return hits;
   }
 
-  function emitDust(edge, candidates) {
-    if (!candidates.length || screenReaderMotion || window.innerWidth < 650 ||
-        document.hidden || dustCount > 32) return;
-    const region = candidates[Math.floor(Math.random() * candidates.length)];
-    const left = Math.max(header.getBoundingClientRect().left + 15, region.left + 6);
-    const right = Math.min(header.getBoundingClientRect().right - 15, region.right - 6);
-    if (right <= left) return;
-
-    for (let i = 0; i < 4 && dustCount < 36; i++) {
-      const piece = document.createElement("span");
-      piece.className = "stardust-pixel";
-      const size = Math.random() > .70 ? 3 : 2;
-      piece.style.width = size + "px";
-      piece.style.height = size + "px";
-      piece.style.left = rand(left, right).toFixed(1) + "px";
-      piece.style.top = (edge + rand(9, 34)).toFixed(1) + "px";
-      piece.style.setProperty("--drift-x", rand(-24, 24).toFixed(1) + "px");
-      piece.style.setProperty("--drift-y", rand(-28, -52).toFixed(1) + "px");
-      piece.style.setProperty("--dust-duration", rand(510, 880).toFixed(0) + "ms");
-      piece.style.setProperty("--dust-color", Math.random() > .45 ? "#ccdcff" : "#83b6ff");
-      dustLayer.appendChild(piece);
-      dustCount++;
-      piece.addEventListener("animationend", () => {
-        piece.remove();
-        dustCount = Math.max(0, dustCount - 1);
+  function createParticles(edge, contacts) {
+    if (isReduced || document.hidden || activeDust > 70) return;
+    const viewport = header.getBoundingClientRect();
+    const narrow = window.innerWidth < 650;
+    const total = narrow ? 3 : 8;
+    for (let i = 0; i < total && activeDust < 75; i++) {
+      const hit = contacts.length
+        ? contacts[Math.floor(Math.random() * contacts.length)]
+        : null;
+      // If the scroll passes whitespace, keep only a few traces of stardust.
+      if (!hit && i >= 2) break;
+      const minX = Math.max(viewport.left + 18, hit ? hit.left : viewport.left + 35);
+      const maxX = Math.min(viewport.right - 18, hit ? hit.right : viewport.right - 35);
+      if (maxX <= minX) continue;
+      const size = Math.random() < .28 ? 4 : (Math.random() < .53 ? 3 : 2);
+      const pixel = document.createElement("span");
+      pixel.className = "stardust-pixel";
+      pixel.style.left = random(minX, maxX).toFixed(1) + "px";
+      pixel.style.top = random(edge - 10, edge + 35).toFixed(1) + "px";
+      pixel.style.width = size + "px";
+      pixel.style.height = size + "px";
+      pixel.style.setProperty("--drift-x", random(-40, 40).toFixed(1) + "px");
+      pixel.style.setProperty("--drift-y", random(-46, -92).toFixed(1) + "px");
+      pixel.style.setProperty("--dust-duration", random(670, 1100).toFixed(0) + "ms");
+      pixel.style.setProperty("--dust-color", Math.random() < .30 ? "#ffffff" : Math.random() < .68 ? "#b1d0ff" : "#6aafff");
+      dustLayer.appendChild(pixel);
+      activeDust++;
+      pixel.addEventListener("animationend", () => {
+        pixel.remove();
+        activeDust = Math.max(0, activeDust - 1);
       }, {once: true});
     }
   }
 
-  function update() {
-    frameId = 0;
-    const bounds = header.getBoundingClientRect();
-    const edge = bounds.bottom;
+  function render() {
+    scrollFrame = 0;
+    const panel = header.getBoundingClientRect();
+    const edge = panel.bottom;
+    const scrolled = window.scrollY;
+    const descending = scrolled > oldY + .5;
+    const scrolling = Math.abs(scrolled - oldY) > .5;
+    oldY = scrolled;
 
-    // Coordinates of the fixed panel edge expressed in each scrolling element.
-    // A 68px fade erases glyphs/cards BEFORE they can touch the navbar.
-    let anyContact = false;
-    regions.forEach(region => {
+    // Use plain pixel stops for reliable -webkit-mask-image and mask-image.
+    // The top is transparent. Text becomes fully opaque 18px below the panel.
+    let overlapsContent = false;
+    for (const region of targets) {
       const rect = region.getBoundingClientRect();
-      const localCut = edge - rect.top - 18;
-      const active = localCut > -1 && rect.bottom > edge;
-      region.classList.toggle("scroll-dissolving", active);
-      if (active) {
-        region.style.setProperty("--dissolve-cut", Math.round(localCut / 2) * 2 + "px");
-        anyContact = true;
+      const overlaps = rect.top < edge + 110 && rect.bottom > edge + 10;
+      region.classList.toggle("scroll-dissolving", overlaps);
+      if (overlaps) {
+        const start = Math.max(0, edge - 108 - rect.top);
+        const end = Math.max(start + 50, edge + 18 - rect.top);
+        region.style.setProperty("--dissolve-start", start.toFixed(0) + "px");
+        region.style.setProperty("--dissolve-end", end.toFixed(0) + "px");
+        overlapsContent = true;
       } else {
-        region.style.removeProperty("--dissolve-cut");
+        region.style.removeProperty("--dissolve-start");
+        region.style.removeProperty("--dissolve-end");
       }
-    });
+    }
 
-    const y = window.scrollY;
-    const descending = y > lastScrollY + .4;
-    lastScrollY = y;
+    scanner.style.left = (panel.left + 20).toFixed(0) + "px";
+    scanner.style.width = Math.max(0, panel.width - 40).toFixed(0) + "px";
+    scanner.style.top = (edge - 2).toFixed(0) + "px";
+
+    // Visible whenever scrolling under the sticky bar, stronger at contact.
+    const enabled = scrolled > 28 && overlapsContent;
+    scanner.classList.toggle("active", enabled && !isReduced);
     const now = performance.now();
-
-    // The border blooms very subtly when content reaches the fade zone.
-    const nearby = anyContact && y > 10 && main.getBoundingClientRect().bottom > edge;
-    if (descending && nearby && !screenReaderMotion && now - lastBurstAt > 115) {
-      const candidates = findContact(edge);
-      if (candidates.length) {
-        header.classList.add("stardust-contact");
-        emitDust(edge, candidates);
-        lastBurstAt = now;
-      } else {
-        header.classList.remove("stardust-contact");
+    if (enabled && !isReduced && scrolling) {
+      header.classList.add("stardust-contact");
+      if (descending && now - lastEmission > 65) {
+        createParticles(edge, selectContact(edge));
+        lastEmission = now;
       }
-    } else if (!nearby || !descending) {
+    } else {
       header.classList.remove("stardust-contact");
     }
+    if (isReduced) header.classList.remove("stardust-contact");
   }
 
   function schedule() {
-    if (frameId) return;
-    frameId = requestAnimationFrame(update);
+    if (!scrollFrame) scrollFrame = requestAnimationFrame(render);
+  }
+
+  function changeMotion(event) {
+    isReduced = event.matches;
+    if (isReduced) {
+      dustLayer.querySelectorAll(".stardust-pixel").forEach(el => el.remove());
+      activeDust = 0;
+    }
+    schedule();
   }
 
   window.addEventListener("scroll", schedule, {passive: true});
   window.addEventListener("resize", schedule, {passive: true});
   window.addEventListener("pageshow", schedule);
-  const changeMotion = event => {
-    screenReaderMotion = event.matches;
-    if (screenReaderMotion) {
-      dustLayer.replaceChildren();
-      dustCount = 0;
-      header.classList.remove("stardust-contact");
-    }
-    schedule();
-  };
-  if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", changeMotion);
-  else reduceMotion.addListener(changeMotion);
-
-  update();
+  document.addEventListener("visibilitychange", schedule);
+  if (reduced.addEventListener) reduced.addEventListener("change", changeMotion);
+  else reduced.addListener(changeMotion);
+  render();
 })();
