@@ -148,3 +148,16 @@ body.cosmic-site > header.nav.stardust-contact{border-color:rgba(135,184,255,.38
 .stardust-pixel{position:absolute;background:var(--dust-color,#b9ceff);box-shadow:0 0 8px rgba(148,190,255,.6);will-change:transform,opacity;animation:stardust-evaporate var(--dust-duration,650ms) ease-out forwards}
 @keyframes stardust-evaporate{0%{transform:translate3d(0,0,0) scale(1);opacity:.85}70%{opacity:.53}100%{transform:translate3d(var(--drift-x,12px),var(--drift-y,-40px),0) scale(.25);opacity:0}}
 @media(prefers-reduced-motion:reduce){.stardust-layer{display:none!important}.stardust-pixel{animation:none!important}}
+
+
+/* Stardust v2: reliable mask pixel stops and a visible blue scan beam. */
+body.cosmic-site > main.scroll-dissolving,
+body.cosmic-site > footer.scroll-dissolving{
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0px,transparent var(--dissolve-start,0px),rgba(0,0,0,.18) calc(var(--dissolve-start,0px) + 48px),#000 var(--dissolve-end,140px))!important;
+  mask-image:linear-gradient(to bottom,transparent 0px,transparent var(--dissolve-start,0px),rgba(0,0,0,.18) calc(var(--dissolve-start,0px) + 48px),#000 var(--dissolve-end,140px))!important;
+}
+.stardust-scanner{position:fixed;height:2px;pointer-events:none;opacity:0;background:linear-gradient(90deg,transparent,rgba(121,174,255,.18) 12%,rgba(214,232,255,.86) 50%,rgba(121,174,255,.18) 88%,transparent);box-shadow:0 0 13px 3px rgba(98,159,255,.22);transition:opacity .15s ease}
+.stardust-scanner.active{opacity:.78}
+body.cosmic-site > header.nav.stardust-contact{border-color:rgba(141,192,255,.51)!important;box-shadow:0 10px 32px rgba(0,0,0,.34),0 0 28px rgba(85,142,246,.17),inset 0 1px rgba(221,237,255,.13)}
+.stardust-pixel{filter:none;box-shadow:0 0 8px 2px rgba(129,183,255,.46)}
+@media(prefers-reduced-motion:reduce){.stardust-scanner{display:none!important}}
