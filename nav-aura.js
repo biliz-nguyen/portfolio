@@ -79,11 +79,15 @@
 
   function wavePoint(distance,time,amp,phase=0) {
     const p=perimeterPoint(distance);
+    // Superposition of three travelling frequencies yields living, uneven waves.
     const wave = amp * (
-      .66*Math.sin(distance*.033-time*1.65+phase) +
-      .34*Math.cos(distance*.019+time*1.25-phase*.5)
+      .56*Math.sin(distance*.034-time*1.8+phase) +
+      .26*Math.cos(distance*.018+time*1.3-phase*.5) +
+      .25*Math.sin(distance*.069-time*2.55+phase*1.4)
     );
-    return {x:p.x+MARGIN+p.nx*wave,y:p.y+MARGIN+p.ny*wave};
+    const breath=.65*Math.sin(time*1.15+distance*.011+phase);
+    return {x:p.x+MARGIN+p.nx*(wave+breath),
+            y:p.y+MARGIN+p.ny*(wave+breath),nx:p.nx,ny:p.ny};
   }
 
   // A luminous band with tapered opacity. The wavy motion is normal to the
@@ -101,13 +105,13 @@
       ctx.save();
       ctx.lineCap="round";
       ctx.lineJoin="round";
-      ctx.lineWidth=layer===0?haloWidth+boost*1.8:coreWidth+boost*.55;
-      ctx.shadowBlur=layer===0?haloBlur+boost*8:7+boost*5;
+      ctx.lineWidth=layer===0?haloWidth+boost*2.2:coreWidth+boost*.7;
+      ctx.shadowBlur=layer===0?haloBlur+boost*11:8+boost*6;
       ctx.shadowColor=layer===0?"rgba(73,139,255,.36)":"rgba(173,219,255,.28)";
-      let prev=wavePoint(begin,time,amp+(layer===0?.65:0)+boost*3.3,phase+(layer===0?.12:0));
+      let prev=wavePoint(begin,time,amp+(layer===0?1.0:.15)+boost*4.8,phase+(layer===0?.12:0));
       for(let i=1;i<=steps;i++) {
         const s=i/steps;
-        const p=wavePoint(begin+s*len,time,amp+(layer===0?.65:0)+boost*3.3,phase+(layer===0?.12:0));
+        const p=wavePoint(begin+s*len,time,amp+(layer===0?1.0:.15)+boost*4.8,phase+(layer===0?.12:0));
         // Gentle fade-in/out prevents visible hard line endings.
         const envelope=Math.pow(Math.max(0,Math.sin(Math.PI*(s-.5/steps))),.72);
         const opacity=(layer===0?alpha*.32:alpha) * envelope+
@@ -128,11 +132,10 @@
   function ribbons(time,boost) {
     ctx.save();
     const bands=[
-      // Deliberately different lengths, luminosities, speeds and curvature.
-      {start:.015,span:.18,amp:4.8,alpha:.24,phase:.20,drift:.009,coreWidth:1.23,haloWidth:5.8,haloBlur:18},
-      {start:.11,span:.34,amp:2.9,alpha:.11,phase:1.85,drift:-.004,coreWidth:.90,haloWidth:4.1,haloBlur:13},
-      {start:.58,span:.16,amp:3.8,alpha:.16,phase:2.75,drift:.006,coreWidth:1.05,haloWidth:4.8,haloBlur:14},
-      {start:.77,span:.15,amp:5.6,alpha:.24,phase:4.10,drift:-.008,coreWidth:1.33,haloWidth:6.2,haloBlur:19}
+      {start:.01,span:.22,amp:6.2,alpha:.23,phase:.20,drift:.010,coreWidth:1.30,haloWidth:6.2,haloBlur:19},
+      {start:.12,span:.37,amp:4.0,alpha:.115,phase:1.85,drift:-.004,coreWidth:.95,haloWidth:4.6,haloBlur:14},
+      {start:.56,span:.18,amp:5.1,alpha:.17,phase:2.75,drift:.007,coreWidth:1.08,haloWidth:5.2,haloBlur:15},
+      {start:.75,span:.17,amp:6.8,alpha:.25,phase:4.10,drift:-.009,coreWidth:1.36,haloWidth:6.7,haloBlur:20}
     ];
     for(const band of bands)drawRibbonSegment(band,time,boost);
 
@@ -159,14 +162,67 @@
     ctx.restore();
   }
 
+  // Animated acoustic-looking wavefronts propagate out of the luminous bead.
+  // Open arcs and short echoes avoid a hard ring or full nav outline.
+  function soundRipples(point,time,boost) {
+    ctx.save();
+    const cycle=time*1.1;
+    for(let i=0;i<3;i++) {
+      const progress=(cycle-i/3+6)%1;
+      const radius=7+progress*(27+boost*15);
+      const opacity=(1-progress)*(.11+boost*.085);
+      ctx.strokeStyle="rgba(149,207,255,"+opacity.toFixed(3)+")";
+      ctx.lineWidth=1.05-progress*.38;
+      ctx.shadowBlur=7+boost*6;
+      ctx.shadowColor="rgba(117,177,255,.28)";
+      ctx.beginPath();
+      ctx.arc(point.x,point.y,radius,.18+i*.18,Math.PI*1.52+i*.16);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // A pair of shorter echo waves expands outward from parts of the
+  // navigation edge, with gradually disappearing crests.
+  function waveEchoes(time,boost) {
+    ctx.save();
+    ctx.lineCap="round";
+    for(let group=0;group<2;group++) {
+      const origin=(group===0?.21:.78)*perimeter;
+      for(let n=0;n<2;n++) {
+        const phase=(time*.21+n*.5+group*.28)%1;
+        const distanceOut=4+phase*(15+boost*10);
+        const width=(group===0?.085:.07)*perimeter;
+        const steps=22;
+        ctx.beginPath();
+        for(let i=0;i<=steps;i++) {
+          const u=i/steps;
+          const d=origin+width*u;
+          const p=wavePoint(d,time,2.3+boost*2.7,group*2.3+n*.8);
+          const fade=Math.sin(Math.PI*u);
+          const px=p.x+p.nx*distanceOut*fade;
+          const py=p.y+p.ny*distanceOut*fade;
+          if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+        }
+        const alpha=(1-phase)*(group===0?.083:.062)*(1+boost*.7);
+        ctx.strokeStyle="rgba(137,191,255,"+alpha.toFixed(3)+")";
+        ctx.lineWidth=.8;
+        ctx.shadowBlur=5;
+        ctx.shadowColor="rgba(95,158,255,.20)";
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
   function energyStream(time,boost) {
-    const step=5.2+boost*3.2;
-    const length=28+Math.round(boost*14);
+    const step=5.0+boost*3.4;
+    const length=30+Math.round(boost*15);
     ctx.save();
     ctx.globalCompositeOperation="lighter";
     for(let i=length;i>=0;i--) {
       const strength=1-i/(length+1);
-      const p=wavePoint(position-i*step,time,5.0+boost*7.4,2.6);
+      const p=wavePoint(position-i*step,time,5.6+boost*8.2,2.6);
       const alpha=(.04+.48*strength*strength)*(1+boost*.38);
       const sz=.8+strength*(3.6+boost*1.4);
       ctx.fillStyle="rgba(137,188,255,"+Math.min(1,alpha).toFixed(3)+")";
@@ -176,7 +232,7 @@
         ctx.fillRect(p.x-.6,p.y-.6,1.2,1.2);
       }
     }
-    const p=wavePoint(position,time,5.0+boost*7.4,2.6);
+    const p=wavePoint(position,time,5.6+boost*8.2,2.6);
     const halo=20+boost*14;
     const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,halo);
     grad.addColorStop(0,"rgba(255,255,255,.99)");
@@ -193,12 +249,14 @@
       ctx.lineWidth=.9;
       ctx.beginPath();ctx.arc(p.x,p.y,ripple,.1,Math.PI*1.55);ctx.stroke();
     }
+    soundRipples(p,time,boost);
     ctx.restore();
   }
 
   function draw(time,boost) {
     ctx.clearRect(0,0,w+MARGIN*2,h+MARGIN*2);
     ribbons(time,boost);
+    waveEchoes(time,boost);
     energyStream(time,boost);
   }
 

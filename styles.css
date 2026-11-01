@@ -488,3 +488,11 @@ body.cosmic-site > header.nav::before {
     rgba(22,36,68,.012) 42%,
     rgba(10,17,36,0) 70%) !important;
 }
+
+
+/* Acoustic Photonic Aura V3 — lively, outward-dispersing waves. */
+body.cosmic-site .nav-aura-canvas {
+  opacity: .98;
+  mix-blend-mode: screen;
+  filter: saturate(1.06);
+}
