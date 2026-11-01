@@ -198,7 +198,7 @@
         ctx.fillRect(px,py-2,.5,4.5);
       }
     }
-    drawComet(time, dt);
+    // Comet rendered by independent nav-comet.js overlay for visibility.
   }
 
   function tick(now) {

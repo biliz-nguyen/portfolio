@@ -283,3 +283,49 @@ body.cosmic-site>footer.scroll-dissolving{
 @media(max-width:760px){
   .page-home .pixel-lab{margin-top:28px}
 }
+
+
+/* V3: Independent comet overlay. Above navbar and molecular particles. */
+.nav-comet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1008;
+  pointer-events: none;
+  overflow: visible;
+  contain: layout style;
+}
+.nav-comet-head,
+.nav-comet-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+.nav-comet-head {
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  box-shadow:
+    0 0 5px 2px rgba(255,255,255,.96),
+    0 0 13px 5px rgba(126,193,255,.78),
+    0 0 26px 11px rgba(73,127,247,.33);
+}
+.nav-comet-head::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(191,222,255,.11);
+  border-radius: inherit;
+}
+.nav-comet-trail {
+  width: 4px;
+  height: 4px;
+  background: #b8d8ff;
+  box-shadow: 0 0 7px 2px rgba(124,178,255,.62);
+}
+.nav-comet-reduced .nav-comet-trail { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .nav-comet-head { box-shadow: 0 0 5px 1px #fff, 0 0 13px 4px rgba(127,184,255,.5); }
+}
