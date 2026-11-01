@@ -92,15 +92,15 @@
     oldY = scrolled;
 
     // Use plain pixel stops for reliable -webkit-mask-image and mask-image.
-    // The top is transparent. Text becomes fully opaque 18px below the panel.
+    // Text is invisible through the panel, then returns gradually below it.
     let overlapsContent = false;
     for (const region of targets) {
       const rect = region.getBoundingClientRect();
       const overlaps = rect.top < edge + 110 && rect.bottom > edge + 10;
       region.classList.toggle("scroll-dissolving", overlaps);
       if (overlaps) {
-        const start = Math.max(0, edge - 108 - rect.top);
-        const end = Math.max(start + 50, edge + 18 - rect.top);
+        const start = Math.max(0, edge + 12 - rect.top);
+        const end = Math.max(start + 65, edge + 82 - rect.top);
         region.style.setProperty("--dissolve-start", start.toFixed(0) + "px");
         region.style.setProperty("--dissolve-end", end.toFixed(0) + "px");
         overlapsContent = true;
