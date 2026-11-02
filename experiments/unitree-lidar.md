@@ -1,42 +1,30 @@
-# Unitree LiDAR L1 — ROS 2 & Point-LIO
+# Unitree LiDAR L1 — ROS 2 Humble & Point-LIO
 
-**PERSONAL LAB LOG / UNITREE_L1 / ROS2 / SLAM / SETUP TEST**
+**UNITREE L1 / ROS 2 / POINT CLOUD / SLAM**
 
-> **SETUP TESTED — OWNER CONFIRMED.** I used this project to test the Unitree LiDAR L1 setup, ROS 2 point-cloud visualization and the LiDAR/SLAM workflow. At that stage I **did not use sensor data to train a model**, nor did I run a quantitative SLAM benchmark. The hardware was not independently retested while preparing this portfolio write-up.
+## 01 / Overview
 
-## 01 / Why this experiment matters
+This is my personal setup and testing project for the **Unitree LiDAR L1**. I used it to explore sensor data with **ROS 2 Humble** and **RViz2**, and to try the **Point-LIO** mapping workflow.
 
-A robotics perception pipeline begins with trustworthy sensor data. Before asking whether LiDAR–inertial odometry or SLAM is accurate, we need to confirm that the LiDAR publishes correctly, that its IMU is accessible, and that timestamps and coordinate frames are consistent.
+The original project is published on my other account: [Unitree-Lidar-L1-SLAM](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM).
 
-In this article, I revisit my [Unitree-Lidar-L1-SLAM project](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM), a ROS 2 setup tutorial for the **Unitree LiDAR L1**. The README covers Ubuntu 22.04, ROS 2 Humble, Colcon, RViz2, a Point-LIO ROS 2 workflow and optional WSL USB forwarding.
+**Author:** Biliz Nguyen (NguyenLeMinh-dev).
 
-**Project author: Biliz Nguyen.** This is my personal LiDAR setup and SLAM learning project, published from my other GitHub account, [NguyenLeMinh-dev](https://github.com/NguyenLeMinh-dev). I wrote and maintained the source tutorial. This review organizes my work as a technical learning log while separating documented setup instructions from independently validated experimental results.
+This project focuses on sensor setup, running the driver and visualizing point clouds. It was not a machine-learning training project or a quantitative SLAM benchmark.
 
-## 02 / System and data flow
+## 02 / Software requirements
 
-- Unitree LiDAR L1 produces raw range and inertial measurements.
-- The Unitree ROS 2 package decodes and publishes point cloud and IMU messages.
-- RViz2 helps inspect coverage, geometry and reference frames.
-- Point-LIO processes LiDAR and IMU inputs for LiDAR–inertial motion estimation and mapping.
-- Reliable conclusions require recorded data, calibration, repeatable test conditions and evaluation.
+- Unitree LiDAR L1
+- Ubuntu 22.04 LTS
+- ROS 2 Humble
+- Colcon build tools
+- RViz2
+- Unitree LiDAR ROS 2 driver
+- Point-LIO ROS 2 port (for mapping)
 
-**What I tested:** I checked the Unitree L1 setup, ROS 2 sensor visualization and exploratory SLAM pipeline. I did **not** use its sensor data to train a machine-learning model.
+## 03 / Install ROS 2 Humble
 
-**What remains outside this test:** repeatable quantitative SLAM evaluation, calibrated accuracy measurements and model-training experiments. Point-LIO estimates motion/maps from LiDAR and IMU inputs; that is not the same as training a learned model.
-
-## 03 / Environment and prerequisites
-
-- **Hardware:** Unitree LiDAR L1; exact firmware, mounting orientation and computer specification to be confirmed.
-- **Documented OS:** Ubuntu 22.04 LTS.
-- **Documented ROS:** ROS 2 Humble; Colcon workspace.
-- **Tools:** RViz2, Unitree ROS 2 driver, Point-LIO ROS 2 port.
-- **Optional host configuration:** Windows Subsystem for Linux with usbipd-win.
-
-**Compatibility warning:** The official Unitree driver README documents Ubuntu 20.04 with ROS 2 Foxy as its verified setup. The linked personal tutorial targets Humble, so Humble compatibility must be checked on the actual workstation.
-
-## 04 / Preparing ROS 2
-
-Install ROS 2 from the [official ROS 2 Humble guide](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html). After installation:
+First install ROS 2 Humble using the [official Ubuntu instructions](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html). After installation, open a terminal:
 
 ~~~bash
 source /opt/ros/humble/setup.bash
@@ -44,13 +32,11 @@ echo "$ROS_DISTRO"
 sudo apt install python3-colcon-common-extensions
 ~~~
 
-Expected distribution name: **humble**.
+The expected ROS distribution is `humble`. To load it in new terminals automatically, add the source command to your shell configuration.
 
-My original tutorial contains a clone URL for a standalone package under a Unitree account that is no longer accessible in this review. The official SDK instead contains the ROS 2 package under its own repository tree.
+## 04 / Run the Unitree LiDAR L1
 
-## 05 / Unitree driver: build and visualize
-
-This is the **official SDK layout**, not a claim that the commands were newly tested for this article:
+The original tutorial used a standalone driver clone URL that may no longer be available. The ROS 2 driver is available in the [official Unitree SDK repository](https://github.com/unitreerobotics/unilidar_sdk). A starting layout is:
 
 ~~~bash
 git clone https://github.com/unitreerobotics/unilidar_sdk.git
@@ -60,23 +46,16 @@ colcon build --symlink-install
 source install/setup.bash
 ~~~
 
-Check which serial interface is connected and verify the parameter in the driver's launch file:
+The official driver documentation lists a ROS 2 Foxy environment; this project used Humble, so dependency and build compatibility should be checked against the actual SDK version.
+
+Check the connected serial interface and the launch configuration:
 
 ~~~bash
 ls /dev/ttyUSB*
 ros2 launch unitree_lidar_ros2 launch.py
 ~~~
 
-The official driver documentation uses **/dev/ttyUSB0** as its default serial interface, but the real path may differ.
-
-Typical default ROS 2 topics and frames documented by Unitree:
-
-- **Point cloud topic:** /unilidar/cloud
-- **LiDAR frame:** unilidar_lidar
-- **IMU topic:** /unilidar/imu
-- **IMU frame:** unilidar_imu
-
-Confirm the topics actually published in your setup:
+Inspect the ROS 2 messages:
 
 ~~~bash
 ros2 topic list
@@ -85,23 +64,25 @@ ros2 topic hz /unilidar/cloud
 ros2 topic echo /unilidar/imu --once
 ~~~
 
-Open the supplied RViz2 configuration from the Unitree driver workspace:
+The default topics in the referenced driver and Point-LIO configuration include `/unilidar/cloud` and `/unilidar/imu`.
+
+## 05 / Visualize the point cloud with RViz2
+
+From the driver workspace, open the included RViz2 configuration:
 
 ~~~bash
 rviz2 -d src/unitree_lidar_ros2/rviz/view.rviz
 ~~~
 
-If nothing appears, inspect the RViz **Fixed Frame**, PointCloud2 topic, QoS settings and any missing TF transform before concluding the driver is broken.
+In RViz2, select the correct point cloud topic and **Fixed Frame**. This is the first practical check for the LiDAR stream and how the environment appears in 3D.
 
-![Unitree LiDAR L1 point-cloud visualization from the original repository](https://raw.githubusercontent.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM/main/docs/images/lidar_unitree_l1.png)
+![Unitree LiDAR L1 point-cloud view](https://raw.githubusercontent.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM/main/docs/images/lidar_unitree_l1.png)
 
-*Figure 1 — RViz2 screenshot provided in the source project's LiDAR setup section; not a calibrated measurement.*
+*Unitree L1 point-cloud visualization — image from my original repository.*
 
-## 06 / Point-LIO integration
+## 06 / Point-LIO — SLAM setup
 
-The tutorial also introduces **Point-LIO**, a LiDAR–inertial odometry and mapping pipeline. The referenced [ROS 2 port](https://github.com/dfloreaa/point_lio_ros2) contains a Unitree L1 launch file and configuration.
-
-For an isolated Point-LIO workspace, the source workflow can be expressed as:
+I also explored the [Point-LIO ROS 2 port](https://github.com/dfloreaa/point_lio_ros2) with the Unitree L1. The workspace and launch flow are:
 
 ~~~bash
 source /opt/ros/humble/setup.bash
@@ -117,25 +98,20 @@ source install/setup.bash
 ros2 launch point_lio mapping_unilidar_l1.launch.py
 ~~~
 
-**Important:** Start the sensor driver separately, then check the actual Point-LIO input and output topics. Successful node startup does not automatically mean that SLAM is producing correct motion estimates.
+Run the LiDAR driver in a separate terminal and check the configuration for the sensor. Important parameters in [`unilidar_l1.yaml`](https://github.com/dfloreaa/point_lio_ros2/blob/main/config/unilidar_l1.yaml) include:
 
-The port's Unitree L1 YAML file defines:
+- `lid_topic` / `imu_topic`: ROS 2 input topics.
+- `time_lag_imu_to_lidar`: LiDAR–IMU timing offset.
+- `extrinsic_T` / `extrinsic_R`: LiDAR–IMU extrinsic calibration.
+- `timestamp_unit`: point-cloud timestamp unit.
 
-- **lid_topic:** /unilidar/cloud
-- **imu_topic:** /unilidar/imu
-- **time_lag_imu_to_lidar:** a parameter for the LiDAR/IMU timing offset.
-- **extrinsic_T** and **extrinsic_R:** a translation and rotation between sensor frames.
-- **timestamp_unit**, **blind**, and other preprocessing/mapping parameters.
+![SLAM visualization from my Unitree L1 project](https://raw.githubusercontent.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM/main/docs/images/lidar_fastLIO.png)
 
-These are configuration values to **inspect and calibrate**, not universal ground-truth values for every device mounting configuration.
+*SLAM visualization — original project screenshot. The filename contains `fastLIO`, so the exact algorithm behind this figure is not labeled as a measured Point-LIO result.*
 
-![Mapping visualization included in the original Unitree L1 repository](https://raw.githubusercontent.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM/main/docs/images/lidar_fastLIO.png)
+## 07 / ROS 2 in WSL (optional)
 
-*Figure 2 — Image appears in the source README's Point-LIO results section, but the filename contains fastLIO. Confirm the algorithm and run conditions before labeling it as a validated Point-LIO experiment.*
-
-## 07 / WSL USB passthrough: optional setup
-
-I also documented using **usbipd-win** to forward a USB device into WSL. On Windows PowerShell with the required privileges:
+For Windows with WSL, my original tutorial also describes USB forwarding through **usbipd-win**. In administrator PowerShell:
 
 ~~~powershell
 winget install --id dorssel.usbipd-win -e
@@ -144,53 +120,24 @@ usbipd bind --busid YOUR_BUS_ID
 usbipd attach --wsl --busid YOUR_BUS_ID
 ~~~
 
-Replace YOUR_BUS_ID with a real value listed by usbipd, then confirm the device within WSL:
+Then check from WSL:
 
 ~~~bash
 ls /dev/ttyUSB*
 ~~~
 
-This option is only relevant when using WSL. Connection behavior, permissions and available interfaces depend on the host setup.
+Replace `YOUR_BUS_ID` with the real identifier returned by `usbipd list`. Use this step only for WSL-based setups.
 
-## 08 / Test scope and available evidence
+## 08 / Results
 
-**Owner-confirmed test:** I used this project for initial hardware and visualization testing, without training a model.
+Through this project I tested the LiDAR setup and explored ROS 2 point-cloud and SLAM visualization. The screenshots above document that stage of the work.
 
-**Documented artifacts:** ROS 2 setup instructions, build/launch commands, an RViz point-cloud screenshot, a mapping screenshot, upstream references and WSL USB notes.
+I did **not** train an AI model using this LiDAR data, and I did not publish trajectory accuracy, ATE/RPE or other quantitative mapping metrics. The focus was getting the sensor pipeline running and understanding the workflow.
 
-**Not present in the reviewed repository tree:** a published sensor log or ROS bag, an annotated trajectory, calibration report, quantitative drift/ATE/RPE values, a reproducible benchmark or measured computation latency.
+## 09 / References
 
-Consequently, any statement about Point-LIO being more accurate than alternative algorithms is **not a measured conclusion of this repository**. The image shows a visualization, not a numerical validation.
-
-## 09 / What I would measure next
-
-1. **Data integrity:** timestamps, message rate, missing frames and point count per scan.
-2. **Geometry:** known-distance checks, coordinate frames and field-of-view coverage.
-3. **LiDAR–IMU integration:** extrinsic rotation/translation, timing offset and initialization behavior.
-4. **Trajectory quality:** inspect stationary, straight-line, rotating and closed-loop motions.
-5. **Evaluation:** use ground-truth reference when available; calculate ATE/RPE or a justified alternative metric.
-6. **Reproducibility:** preserve raw recordings, package versions, YAML parameters and command logs.
-
-The research lesson is simple: **a visually plausible point cloud or map is a milestone, not the final evidence.**
-
-## 10 / Details for a future reproducible study
-
-- [ ] Confirm the exact hardware revision, firmware, computer model and ROS 2 environment.
-- [ ] Verify which SDK clone URL and commands were used successfully.
-- [ ] Confirm topics, frame names, LiDAR–IMU calibration and timing offsets.
-- [ ] Confirm whether Figure 2 shows Point-LIO, FAST-LIO or another pipeline.
-- [ ] Add raw data, a demo/video and a reproducible launch configuration if I expand the test into a full experiment.
-- [ ] Add quantitative results **only after** you can verify how they were obtained.
-- [ ] Review contributor credit and the relationship to other projects.
-
-## 11 / Source links
-
-- [Original tutorial — NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM)
-- [Official Unitree unilidar SDK](https://github.com/unitreerobotics/unilidar_sdk)
-- [Official Unitree ROS 2 driver documentation](https://github.com/unitreerobotics/unilidar_sdk/blob/main/unitree_lidar_ros2/src/unitree_lidar_ros2/README.md)
+- [My original Unitree-Lidar-L1-SLAM repository](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM)
+- [Official Unitree SDK](https://github.com/unitreerobotics/unilidar_sdk)
 - [Point-LIO ROS 2 port](https://github.com/dfloreaa/point_lio_ros2)
-- [Unitree L1 Point-LIO configuration](https://github.com/dfloreaa/point_lio_ros2/blob/main/config/unilidar_l1.yaml)
 - [Point-LIO research repository](https://github.com/hku-mars/Point-LIO)
-- [ROS 2 Humble official installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html)
-
-*Editorial note: Owner-confirmed setup/visualization test, updated 2 November 2026. No model training was performed on the sensor data. Hardware and SLAM performance were not independently retested while writing this article.*
+- [ROS 2 Humble installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html)
