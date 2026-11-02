@@ -4,32 +4,19 @@
  */
 window.EXPERIMENT_LOGS = [
   {
-    slug:"unitree-lidar",number:"001",type:"SENSING",title:"Unitree LiDAR",
-    summary:"A working notebook for sensor integration, point-cloud acquisition, and 3D perception.",
-    status:"DOCUMENTING",scope:"Physical sensor",
-    objective:"Develop a repeatable process for setting up Unitree LiDAR, inspecting point clouds, documenting coordinate frames, and evaluating measurement quality.",
-    questions:[
-      "What is the sensor's reference frame, and how should it be transformed into the robot or world frame?",
-      "How do sampling conditions affect point density, coverage and noise?",
-      "Which preprocessing steps are needed before segmentation or measurement?"
-    ],
-    setup:[
-      "Unitree LiDAR — record the exact model, firmware, driver and mounting position",
-      "Host device, power and communication configuration",
-      "Recording environment, reference objects and sensor-to-target distance"
-    ],
-    workflow:[
-      ["Connect & verify","Document power, drivers, device discovery and timestamp behavior."],
-      ["Capture","Record representative sequences with repeatable motions or static scenes."],
-      ["Inspect & preprocess","Visualize point clouds; inspect scale, axes, outliers and coordinate transforms."],
-      ["Evaluate","Compare measurements with references and note failure modes."],
-      ["Document","Attach source files, parameter values, visualizations and limitations."]
-    ],
-    data:"Point-cloud samples, configuration files, coordinate-frame definitions and measurement references will be linked here once selected for publication.",
-    results:"No verified numerical evaluation has been published in this experiment log yet.",
-    lessons:"Record calibration surprises, data-quality issues, driver problems and useful visualization techniques as work progresses.",
-    notes:[["LiDAR and rubber-tree perception","note.html?slug=lidar-rubber-trees"]],
-    links:[]
+    slug:"unitree-lidar",number:"001",type:"SENSING / SLAM",title:"Unitree LiDAR L1 — ROS 2 & Point-LIO",
+    summary:"ROS 2 driver setup, LiDAR point-cloud visualization, Point-LIO integration and practical validation notes, drawn from the original project documentation.",
+    status:"DRAFT / REVIEW",scope:"LiDAR / IMU / ROS 2",
+    objective:"Document the Unitree LiDAR L1 and Point-LIO tutorial, identifying verified sources and research questions that still require testing.",
+    questions:["How do ROS 2 point cloud and IMU topics connect to a SLAM pipeline?","What timing and extrinsic calibration parameters must be checked?","What evidence is missing before claiming localization accuracy?"],
+    setup:["Unitree LiDAR L1","Ubuntu 22.04 with ROS 2 Humble, RViz2 and Colcon (source tutorial)","Unitree ROS 2 driver and Point-LIO ROS 2 port"],
+    workflow:[["Driver","Inspect serial connection and stream messages."],["Visualization","View and validate the point cloud in RViz2."],["Integration","Configure Point-LIO with correct input topics and extrinsics."],["Review","Assess the screenshots, missing dataset and future benchmark plan."]],
+    data:"The source repository includes two screenshots but no public experiment dataset in its root tree.",
+    results:"No numerical SLAM accuracy or repeated evaluation is documented by the available source.",
+    lessons:"Record assumptions about frame transforms, clock synchronization, hardware setup and evaluation methodology.",
+    notes:[["LiDAR perception and rubber trees","note.html?slug=lidar-rubber-trees"]],
+    links:[["Original Unitree L1 SLAM tutorial","https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM"],["Official Unitree SDK","https://github.com/unitreerobotics/unilidar_sdk"],["Point-LIO ROS 2","https://github.com/dfloreaa/point_lio_ros2"]]
+
   },
   {
     slug:"drone-flight",number:"002",type:"FLIGHT",title:"Drone Flight Tests",

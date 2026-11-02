@@ -585,3 +585,22 @@ body.cosmic-site.page-experiment > main.exp-shell{max-width:1060px;margin:0 auto
 @media(max-width:900px){.exp-list-row{grid-template-columns:110px minmax(0,1fr) 26px;gap:14px}.exp-list-summary{grid-column:2;grid-row:2}.exp-list-arrow{grid-column:3;grid-row:1}}
 @media(max-width:720px){body.cosmic-site.page-experiment>main.exp-shell{padding:30px 20px 65px}.exp-layout{grid-template-columns:1fr;gap:10px}.exp-aside{grid-row:1;padding-top:20px;grid-template-columns:1fr}.exp-list-row{grid-template-columns:1fr 24px;padding:19px 5px;gap:5px}.exp-list-index,.exp-list-title,.exp-list-summary{grid-column:1}.exp-list-arrow{grid-column:2;grid-row:2}.exp-list-header{padding:38px 0 30px}.exp-shell .exp-header{padding:32px 0}.exp-placeholder{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.experiment-card,.experiment-art svg,.exp-list-row{transition:none!important}}
+
+/* Source-backed Unitree LiDAR technical draft — focus-first reading layout */
+.exp-source-article{max-width:740px;padding:16px 0 65px}
+.exp-source-article h2{font-size:clamp(23px,2.8vw,30px);line-height:1.3;letter-spacing:-.035em;color:#edf5ff;margin:40px 0 15px}
+.exp-source-article h3{font-size:17px;color:#e3edfc;margin:26px 0 11px}
+.exp-source-article p,.exp-source-article li{color:#b3c2da;font-size:14px;line-height:1.85}
+.exp-source-article li{margin:8px 0;padding-left:4px}
+.exp-source-article ul,.exp-source-article ol{padding-left:23px;margin:16px 0 22px}
+.exp-source-article strong{color:#e6effc}
+.exp-source-article a{color:#a6c9ff;text-decoration:underline;text-underline-offset:3px}
+.exp-source-article a:hover{color:#fff}
+.exp-source-article .exp-source-code{margin:20px 0;padding:20px;background:rgba(7,15,29,.97);border:1px solid rgba(113,160,218,.22);overflow:auto}
+.exp-source-article .exp-source-code code{white-space:pre;font:12px/1.7 "DM Mono",monospace;color:#cbdffb}
+.exp-source-article figure{margin:25px 0 8px;background:#06101f;border:1px solid rgba(110,160,221,.19)}
+.exp-source-article figure img{display:block;width:100%;max-height:540px;object-fit:contain}
+.exp-source-article .exp-figure-caption{font:12px/1.65 "DM Sans",sans-serif;color:#869ec2;margin:5px 0 28px}
+.exp-source-article blockquote{border-left:3px solid #83abdc;background:rgba(18,37,64,.58);padding:11px 18px;margin:20px 0;color:#aec3dd}
+.exp-article-loading{padding:50px 0;color:#9bb4d3;font:12px "DM Mono",monospace}
+@media(max-width:720px){.exp-source-article .exp-source-code{padding:14px}.exp-source-article .exp-source-code code{font-size:11px}}
