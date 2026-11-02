@@ -422,10 +422,14 @@
     ctx.clearRect(0, 0, w, h);
     atmosphere();
     starfield(t);
-    planetarySurvey(t);
-    spectralChart();
-    meteors(t);
-    spacecraft(t);
+    // Experiment details intentionally use a quiet star/nebula field only.
+    // Avoid large planets, orbit formulas, satellites and animated spaceships.
+    if (!document.body.classList.contains("page-experiment")) {
+      planetarySurvey(t);
+      spectralChart();
+      meteors(t);
+      spacecraft(t);
+    }
   }
 
   function tick(timestamp) {
