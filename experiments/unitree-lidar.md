@@ -1,14 +1,16 @@
 # Unitree LiDAR L1 — ROS 2 & Point-LIO
 
+**PERSONAL LAB LOG / UNITREE_L1 / ROS2 / SLAM**
+
 > **DRAFT / NEEDS REVIEW.** This article is based on the publicly available tutorial repository. The commands and screenshots have not been independently tested with the physical sensor while preparing this portfolio entry.
 
 ## 01 / Why this experiment matters
 
 A robotics perception pipeline begins with trustworthy sensor data. Before asking whether LiDAR–inertial odometry or SLAM is accurate, we need to confirm that the LiDAR publishes correctly, that its IMU is accessible, and that timestamps and coordinate frames are consistent.
 
-This write-up reviews the [Unitree-Lidar-L1-SLAM project](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM), a ROS 2 setup tutorial for the **Unitree LiDAR L1**. The README covers Ubuntu 22.04, ROS 2 Humble, Colcon, RViz2, a Point-LIO ROS 2 workflow and optional WSL USB forwarding.
+In this article, I revisit my [Unitree-Lidar-L1-SLAM project](https://github.com/NguyenLeMinh-dev/Unitree-Lidar-L1-SLAM), a ROS 2 setup tutorial for the **Unitree LiDAR L1**. The README covers Ubuntu 22.04, ROS 2 Humble, Colcon, RViz2, a Point-LIO ROS 2 workflow and optional WSL USB forwarding.
 
-The source README credits **Nguyen Le Minh, Duong Thien Truong and Nguyen Thanh Cong**. This portfolio article points to that shared source and does not imply sole authorship.
+**Project author: Biliz Nguyen.** This is my personal LiDAR setup and SLAM learning project, published from my other GitHub account, [NguyenLeMinh-dev](https://github.com/NguyenLeMinh-dev). I wrote and maintained the source tutorial. This review organizes my work as a technical learning log while separating documented setup instructions from independently validated experimental results.
 
 ## 02 / System and data flow
 
@@ -18,7 +20,7 @@ The source README credits **Nguyen Le Minh, Duong Thien Truong and Nguyen Thanh 
 - Point-LIO processes LiDAR and IMU inputs for LiDAR–inertial motion estimation and mapping.
 - Reliable conclusions require recorded data, calibration, repeatable test conditions and evaluation.
 
-The source project demonstrates a **setup and visualization workflow**. It does not publish a quantitative SLAM benchmark.
+This repository records my **setup and visualization workflow**. I have not published a quantitative SLAM benchmark in it, so I keep screenshots separate from accuracy claims.
 
 ## 03 / Environment and prerequisites
 
@@ -42,7 +44,7 @@ sudo apt install python3-colcon-common-extensions
 
 Expected distribution name: **humble**.
 
-The original tutorial contains a clone URL for a standalone package under a Unitree account that is no longer accessible in this review. The official SDK instead contains the ROS 2 package under its own repository tree.
+My original tutorial contains a clone URL for a standalone package under a Unitree account that is no longer accessible in this review. The official SDK instead contains the ROS 2 package under its own repository tree.
 
 ## 05 / Unitree driver: build and visualize
 
@@ -131,7 +133,7 @@ These are configuration values to **inspect and calibrate**, not universal groun
 
 ## 07 / WSL USB passthrough: optional setup
 
-The original guide also describes using **usbipd-win** to forward a USB device into WSL. On Windows PowerShell with the required privileges:
+I also documented using **usbipd-win** to forward a USB device into WSL. On Windows PowerShell with the required privileges:
 
 ~~~powershell
 winget install --id dorssel.usbipd-win -e
@@ -187,4 +189,4 @@ The research lesson is simple: **a visually plausible point cloud or map is a mi
 - [Point-LIO research repository](https://github.com/hku-mars/Point-LIO)
 - [ROS 2 Humble official installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html)
 
-*Editorial note: Draft prepared from the accessible source documentation on 2 November 2026. Hardware/software functionality was not independently tested while writing this article.*
+*Editorial note: Personal research log, drafted for review on 2 November 2026 from my source repository. The hardware was not independently retested while writing this portfolio article.*
