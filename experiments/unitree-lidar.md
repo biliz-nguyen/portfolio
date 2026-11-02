@@ -1,8 +1,8 @@
 # Unitree LiDAR L1 — ROS 2 & Point-LIO
 
-**PERSONAL LAB LOG / UNITREE_L1 / ROS2 / SLAM**
+**PERSONAL LAB LOG / UNITREE_L1 / ROS2 / SLAM / SETUP TEST**
 
-> **DRAFT / NEEDS REVIEW.** This article is based on the publicly available tutorial repository. The commands and screenshots have not been independently tested with the physical sensor while preparing this portfolio entry.
+> **SETUP TESTED — OWNER CONFIRMED.** I used this project to test the Unitree LiDAR L1 setup, ROS 2 point-cloud visualization and the LiDAR/SLAM workflow. At that stage I **did not use sensor data to train a model**, nor did I run a quantitative SLAM benchmark. The hardware was not independently retested while preparing this portfolio write-up.
 
 ## 01 / Why this experiment matters
 
@@ -20,7 +20,9 @@ In this article, I revisit my [Unitree-Lidar-L1-SLAM project](https://github.com
 - Point-LIO processes LiDAR and IMU inputs for LiDAR–inertial motion estimation and mapping.
 - Reliable conclusions require recorded data, calibration, repeatable test conditions and evaluation.
 
-This repository records my **setup and visualization workflow**. I have not published a quantitative SLAM benchmark in it, so I keep screenshots separate from accuracy claims.
+**What I tested:** I checked the Unitree L1 setup, ROS 2 sensor visualization and exploratory SLAM pipeline. I did **not** use its sensor data to train a machine-learning model.
+
+**What remains outside this test:** repeatable quantitative SLAM evaluation, calibrated accuracy measurements and model-training experiments. Point-LIO estimates motion/maps from LiDAR and IMU inputs; that is not the same as training a learned model.
 
 ## 03 / Environment and prerequisites
 
@@ -150,9 +152,11 @@ ls /dev/ttyUSB*
 
 This option is only relevant when using WSL. Connection behavior, permissions and available interfaces depend on the host setup.
 
-## 08 / What is supported by the available evidence?
+## 08 / Test scope and available evidence
 
-**Present in the repository:** ROS 2 setup instructions, build/launch commands, RViz point-cloud screenshot, a mapping screenshot, references to upstream software and WSL USB notes.
+**Owner-confirmed test:** I used this project for initial hardware and visualization testing, without training a model.
+
+**Documented artifacts:** ROS 2 setup instructions, build/launch commands, an RViz point-cloud screenshot, a mapping screenshot, upstream references and WSL USB notes.
 
 **Not present in the reviewed repository tree:** a published sensor log or ROS bag, an annotated trajectory, calibration report, quantitative drift/ATE/RPE values, a reproducible benchmark or measured computation latency.
 
@@ -169,13 +173,13 @@ Consequently, any statement about Point-LIO being more accurate than alternative
 
 The research lesson is simple: **a visually plausible point cloud or map is a milestone, not the final evidence.**
 
-## 10 / Review checklist before publication
+## 10 / Details for a future reproducible study
 
 - [ ] Confirm the exact hardware revision, firmware, computer model and ROS 2 environment.
 - [ ] Verify which SDK clone URL and commands were used successfully.
 - [ ] Confirm topics, frame names, LiDAR–IMU calibration and timing offsets.
 - [ ] Confirm whether Figure 2 shows Point-LIO, FAST-LIO or another pipeline.
-- [ ] Add raw data, a short demo/video and any reproducible launch configuration.
+- [ ] Add raw data, a demo/video and a reproducible launch configuration if I expand the test into a full experiment.
 - [ ] Add quantitative results **only after** you can verify how they were obtained.
 - [ ] Review contributor credit and the relationship to other projects.
 
@@ -189,4 +193,4 @@ The research lesson is simple: **a visually plausible point cloud or map is a mi
 - [Point-LIO research repository](https://github.com/hku-mars/Point-LIO)
 - [ROS 2 Humble official installation](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html)
 
-*Editorial note: Personal research log, drafted for review on 2 November 2026 from my source repository. The hardware was not independently retested while writing this portfolio article.*
+*Editorial note: Owner-confirmed setup/visualization test, updated 2 November 2026. No model training was performed on the sensor data. Hardware and SLAM performance were not independently retested while writing this article.*
